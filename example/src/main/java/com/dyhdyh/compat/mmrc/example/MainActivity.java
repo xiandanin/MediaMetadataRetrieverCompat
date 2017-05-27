@@ -51,11 +51,12 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
         mmrc = new MediaMetadataRetrieverCompat();
         //mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
+        //mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);
     }
 
     public void clickMediaMetadata(View v) {
         String path = TextUtils.isEmpty(ed.getText()) ? testFile.getAbsolutePath() : ed.getText().toString();
-        if (!new File(path).exists()){
+        if (!new File(path).exists()) {
             Toast.makeText(this, "请输入正确的视频路径", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -74,16 +75,16 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         String duration = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION);
         String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_CAPTURE_FRAMERATE);
 
-        bindMetadata(width, height, rotation, numTracks, title, album, albumArtist, author, duration,framerate);
+        bindMetadata(width, height, rotation, numTracks, title, album, albumArtist, author, duration, framerate);
 
         //获取缩略图
         final int thumbnailCount = (int) (Long.parseLong(duration) / 1000);
         final int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
-        final int thumbnailHeight = (int) ((float)thumbnailWidth / Integer.parseInt(width) * Integer.parseInt(height));
-        bindThumbnail(thumbnailCount,thumbnailWidth,thumbnailHeight);
+        final int thumbnailHeight = (int) ((float) thumbnailWidth / Integer.parseInt(width) * Integer.parseInt(height));
+        bindThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
     }
 
-    private void bindMetadata(String width, String height, String rotation, String numTracks, String title, String album, String albumArtist, String author, String duration,String frameRate) {
+    private void bindMetadata(String width, String height, String rotation, String numTracks, String title, String album, String albumArtist, String author, String duration, String frameRate) {
         StringBuilder sb = new StringBuilder();
         sb.append("宽：");
         sb.append(width);
