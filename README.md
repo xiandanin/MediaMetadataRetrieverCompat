@@ -21,19 +21,16 @@ MediaMetadataRetrieverCompat 内部有两种实现，各有特点
 
 ## __快速开始__
 ```
-compile 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.0'
-
-//可选 不引入则使用原生API
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+compile 'com.dyhdyh.compat:media-metadata-retriever-compat:1.0.0'
 ```
 
 ## __初始化（三种模式）__
 ```
-//自动 - 推荐
-MediaMetadataRetrieverCompat mmrc = new MediaMetadataRetrieverCompat();
-//FFmpeg
-//MediaMetadataRetrieverCompat  mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);
-//原生API
+//自动 - 推荐  
+MediaMetadataRetrieverCompat mmrc = new MediaMetadataRetrieverCompat();  
+//FFmpeg  
+//MediaMetadataRetrieverCompat  mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);  
+//原生API  
 //MediaMetadataRetrieverCompat  mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
 ```
 ## __设置路径__

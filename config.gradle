@@ -15,7 +15,7 @@ ext {
             [
                     //项目名称
                     name       : "MediaMetadataRetrieverCompat",
-                    groupId    : "com.dyhdyh.compat.mmrc",
+                    groupId    : "com.dyhdyh.compat",
                     //项目地址
                     siteUrl    : "https://github.com/dengyuhan/MediaMetadataRetrieverCompat",
                     //项目git地址
