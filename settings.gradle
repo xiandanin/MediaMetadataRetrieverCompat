@@ -1,1 +1,1 @@
-include ':app', ':media-metadata-retriever-compat'
+include ':example', ':media-metadata-retriever-compat'
