@@ -1,6 +1,8 @@
 package com.dyhdyh.compat.mmrc.impl;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 import com.dyhdyh.compat.mmrc.IMediaMetadataRetriever;
 
@@ -21,6 +23,11 @@ public class FFmpegMediaMetadataRetrieverImpl implements IMediaMetadataRetriever
     @Override
     public void setDataSource(String path) {
         this.mRetriever.setDataSource(path);
+    }
+
+    @Override
+    public void setDataSource(Context context, Uri uri) {
+        this.mRetriever.setDataSource(context, uri);
     }
 
     @Override

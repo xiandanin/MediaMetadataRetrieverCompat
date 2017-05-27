@@ -1,18 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dyhdyh.compat.mmrc.example.MainActivity">
+    android:orientation="vertical"
+    android:padding="@dimen/activity_vertical_margin">
 
-   <Button
-       android:onClick="click"
-       android:text="取帧"
-       android:layout_width="match_parent"
-       android:layout_height="wrap_content" />
-   <ImageView
-       android:id="@+id/iv"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content" />
-</RelativeLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="解析器类型：" />
+
+        <RadioGroup
+            android:id="@+id/rg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_auto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="自动" />
+
+            <RadioButton
+                android:id="@+id/rb_ffmpeg"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="FFmpeg" />
+
+            <RadioButton
+                android:id="@+id/rb_android"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="原生API" />
+        </RadioGroup>
+    </LinearLayout>
+
+    <EditText
+        android:id="@+id/ed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="@string/hint_video_path" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="clickMediaMetadata"
+        android:text="获取视频信息/缩略图" />
+
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

@@ -1,6 +1,8 @@
 package com.dyhdyh.compat.mmrc;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 
 /**
  * author  dengyuhan
@@ -9,6 +11,8 @@ import android.graphics.Bitmap;
 public interface IMediaMetadataRetriever {
 
     void setDataSource(String path);
+
+    void setDataSource(Context context, Uri uri);
 
     Bitmap getFrameAtTime();
 

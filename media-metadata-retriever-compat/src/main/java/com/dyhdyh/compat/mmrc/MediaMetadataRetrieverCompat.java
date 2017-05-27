@@ -1,14 +1,12 @@
 package com.dyhdyh.compat.mmrc;
 
 import android.graphics.Bitmap;
-import android.graphics.Matrix;
-import android.media.MediaMetadataRetriever;
 import android.text.TextUtils;
 
 import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.impl.MediaMetadataRetrieverImpl;
-
-import wseemann.media.FFmpegMediaMetadataRetriever;
+import com.dyhdyh.compat.mmrc.transform.BitmapRotateTransform;
+import com.dyhdyh.compat.mmrc.transform.MetadataTransform;
 
 /**
  * author  dengyuhan
@@ -66,90 +64,26 @@ public class MediaMetadataRetrieverCompat {
         return impl;
     }
 
-
     public void setDataSource(String path) {
         this.mPath = path;
-        this.impl.setDataSource(path);
+        this.impl.setDataSource(this.mPath);
+        if (this.androidImpl != null) {
+            this.androidImpl.setDataSource(this.mPath);
+        }
     }
 
     public String extractMetadata(int keyCode) {
-        String keyCodeString = null;
-        switch (keyCode) {
-            case METADATA_KEY_ALBUM:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUM);
-                break;
-            case METADATA_KEY_ARTIST:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_ARTIST :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_ARTIST);
-                break;
-            case METADATA_KEY_AUTHOR:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM_ARTIST :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_AUTHOR);
-                break;
-            case METADATA_KEY_COMPOSER:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_COMPOSER :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_COMPOSER);
-                break;
-            case METADATA_KEY_DATE:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_DATE :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_DATE);
-                break;
-            case METADATA_KEY_TITLE:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_TITLE :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_TITLE);
-                break;
-            case METADATA_KEY_DURATION:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION);
-                break;
-            case METADATA_KEY_NUM_TRACKS:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_TRACK :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_NUM_TRACKS);
-                break;
-            case METADATA_KEY_ALBUMARTIST:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_ALBUM_ARTIST :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_ALBUMARTIST);
-                break;
-            case METADATA_KEY_DISC_NUMBER:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_DISC :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER);
-                break;
-            case METADATA_KEY_VIDEO_WIDTH:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH);
-                break;
-            case METADATA_KEY_VIDEO_HEIGHT:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT);
-                break;
-            case METADATA_KEY_VIDEO_ROTATION:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
-                break;
-            case METADATA_KEY_CAPTURE_FRAMERATE:
-                keyCodeString = impl instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.METADATA_KEY_FRAMERATE :
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_CAPTURE_FRAMERATE);
-                break;
-        }
+        String keyCodeString = MetadataTransform.transform(this.impl.getClass(), keyCode);
         if (TextUtils.isEmpty(keyCodeString)) {
             return null;
         }
-        return this.impl.extractMetadata(keyCodeString);
+        String metadata = this.impl.extractMetadata(keyCodeString);
+        if (metadata == null) {
+            //如果ffmpeg失败,自带api替代
+            String androidKeyCodeString = MetadataTransform.transform(MediaMetadataRetrieverImpl.class, keyCode);
+            metadata = getAndroidMediaMetadataRetriever().extractMetadata(androidKeyCodeString);
+        }
+        return metadata;
     }
 
     public Bitmap getFrameAtTime() {
@@ -162,9 +96,9 @@ public class MediaMetadataRetrieverCompat {
     }
 
     public Bitmap getFrameAtTime(long timeUs, int option) {
-        Bitmap frame = this.impl.getFrameAtTime(timeUs, getOption(this.impl, option));
+        Bitmap frame = this.impl.getFrameAtTime(timeUs, option);
         if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getFrameAtTime(timeUs, getOption(this.androidImpl, option));
+            return getAndroidMediaMetadataRetriever().getFrameAtTime(timeUs, option);
         } else {
             return frame;
         }
@@ -180,9 +114,9 @@ public class MediaMetadataRetrieverCompat {
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height) {
-        Bitmap frame = this.impl.getScaledFrameAtTime(timeUs, getOption(this.impl, option), width, height);
+        Bitmap frame = this.impl.getScaledFrameAtTime(timeUs, option, width, height);
         if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getScaledFrameAtTime(timeUs, getOption(this.androidImpl, option), width, height);
+            return getAndroidMediaMetadataRetriever().getScaledFrameAtTime(timeUs, option, width, height);
         } else {
             return frame;
         }
@@ -190,17 +124,23 @@ public class MediaMetadataRetrieverCompat {
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height, float rotate) {
         boolean isRotate = isRotate(rotate);
-        Bitmap frame = getScaledFrameAtTime(timeUs, getOption(this.impl, option),
+        Bitmap frame = getScaledFrameAtTime(timeUs, option,
                 isRotate ? height : width, isRotate ? width : height);
         if (isRotate) {
-            Matrix matrix = new Matrix();
-            matrix.postRotate(rotate);
-            int frameWidth = frame.getWidth();
-            int frameHeight = frame.getHeight();
-            frame = Bitmap.createBitmap(frame, 0, 0, frameWidth, frameHeight, matrix, true);
+            return BitmapRotateTransform.transform(frame, rotate);
         }
         return frame;
     }
+
+    public byte[] getEmbeddedPicture() {
+        return impl.getEmbeddedPicture();
+    }
+
+
+    public void release() {
+        impl.release();
+    }
+
 
     private MediaMetadataRetrieverImpl getAndroidMediaMetadataRetriever() {
         //如果用的是自带的
@@ -216,36 +156,6 @@ public class MediaMetadataRetrieverCompat {
         return this.androidImpl;
     }
 
-    public byte[] getEmbeddedPicture() {
-        return impl.getEmbeddedPicture();
-    }
-
-    private int getOption(IMediaMetadataRetriever retriever, int option) {
-        int tmpOption = option;
-        switch (option) {
-            case OPTION_PREVIOUS_SYNC:
-                tmpOption = retriever instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.OPTION_PREVIOUS_SYNC :
-                        MediaMetadataRetriever.OPTION_PREVIOUS_SYNC;
-                break;
-            case OPTION_NEXT_SYNC:
-                tmpOption = retriever instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.OPTION_NEXT_SYNC :
-                        MediaMetadataRetriever.OPTION_NEXT_SYNC;
-                break;
-            case OPTION_CLOSEST_SYNC:
-                tmpOption = retriever instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.OPTION_CLOSEST_SYNC :
-                        MediaMetadataRetriever.OPTION_CLOSEST_SYNC;
-                break;
-            case OPTION_CLOSEST:
-                tmpOption = retriever instanceof FFmpegMediaMetadataRetrieverImpl ?
-                        FFmpegMediaMetadataRetriever.OPTION_CLOSEST :
-                        MediaMetadataRetriever.OPTION_CLOSEST;
-                break;
-        }
-        return tmpOption;
-    }
 
     private boolean isRotate(float rotate) {
         float abs = Math.abs(rotate);

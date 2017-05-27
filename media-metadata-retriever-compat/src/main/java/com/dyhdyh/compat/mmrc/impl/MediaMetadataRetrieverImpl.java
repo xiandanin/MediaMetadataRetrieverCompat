@@ -1,7 +1,9 @@
 package com.dyhdyh.compat.mmrc.impl;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 
 import com.dyhdyh.compat.mmrc.IMediaMetadataRetriever;
 
@@ -23,6 +25,11 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
     }
 
     @Override
+    public void setDataSource(Context context, Uri uri) {
+        this.mRetriever.setDataSource(context, uri);
+    }
+
+    @Override
     public Bitmap getFrameAtTime() {
         return this.mRetriever.getFrameAtTime();
     }
@@ -34,12 +41,20 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
 
     @Override
     public Bitmap getScaledFrameAtTime(long timeUs, int width, int height) {
-        return Bitmap.createScaledBitmap(this.mRetriever.getFrameAtTime(timeUs), width, height, true);
+        Bitmap atTime = this.mRetriever.getFrameAtTime(timeUs);
+        if (atTime == null) {
+            return null;
+        }
+        return Bitmap.createScaledBitmap(atTime, width, height, true);
     }
 
     @Override
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height) {
-        return Bitmap.createScaledBitmap(this.mRetriever.getFrameAtTime(timeUs, option), width, height, true);
+        Bitmap atTime = this.mRetriever.getFrameAtTime(timeUs, option);
+        if (atTime == null) {
+            return null;
+        }
+        return Bitmap.createScaledBitmap(atTime, width, height, true);
     }
 
     @Override

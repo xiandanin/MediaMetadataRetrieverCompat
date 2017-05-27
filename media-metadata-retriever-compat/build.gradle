@@ -25,6 +25,7 @@ android {
 }
 
 dependencies {
+    compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
 }
 
 install {
