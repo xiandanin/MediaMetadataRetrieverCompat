@@ -21,7 +21,7 @@ MediaMetadataRetrieverCompat 内部有两种实现，各有特点
 
 ## __快速开始__
 ```
-compile 'com.dyhdyh.compat:media-metadata-retriever-compat:1.0.0'
+compile 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.0'
 ```
 
 ## __初始化（三种模式）__

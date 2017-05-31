@@ -15,6 +15,7 @@ import wseemann.media.FFmpegMediaMetadataRetriever;
  * created 2017/5/27 10:39
  */
 public class MetadataTransform {
+
     private static SparseArray<MetadataKey> METADATA_KEYS = new SparseArray<>();
 
     static {
