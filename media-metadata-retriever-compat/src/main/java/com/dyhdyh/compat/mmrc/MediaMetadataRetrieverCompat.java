@@ -2,17 +2,22 @@ package com.dyhdyh.compat.mmrc;
 
 import android.graphics.Bitmap;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.impl.MediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.transform.BitmapRotateTransform;
 import com.dyhdyh.compat.mmrc.transform.MetadataTransform;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+
 /**
  * author  dengyuhan
  * created 2017/5/26 14:48
  */
 public class MediaMetadataRetrieverCompat {
+    private final String TAG = "MediaMetadataRetriever";
 
     private IMediaMetadataRetriever impl;
     private MediaMetadataRetrieverImpl androidImpl;
@@ -48,11 +53,14 @@ public class MediaMetadataRetrieverCompat {
     public MediaMetadataRetrieverCompat(int type) {
         if (type == RETRIEVER_FFMPEG) {
             try {
+                //创建实例前先检查是否引入FFmpegMediaMetadataRetriever
+                Class.forName("wseemann.media.FFmpegMediaMetadataRetriever");
                 //优先ffmpeg
                 this.impl = new FFmpegMediaMetadataRetrieverImpl();
             } catch (Exception e) {
                 //不行就自带的
                 this.impl = new MediaMetadataRetrieverImpl();
+                Log.d(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，使用原生API");
                 e.printStackTrace();
             }
         } else {
@@ -64,8 +72,28 @@ public class MediaMetadataRetrieverCompat {
         return impl;
     }
 
+    /**
+     * @param path
+     * @deprecated Use {@link #setMediaDataSource(String)} instead.
+     */
+    @Deprecated
     public void setDataSource(String path) {
-        this.mPath = path;
+        try {
+            setMediaDataSource(path);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void setMediaDataSource(String path) throws FileNotFoundException {
+        setMediaDataSource(new File(path));
+    }
+
+    public void setMediaDataSource(File file) throws FileNotFoundException {
+        if (!file.exists()) {
+            new FileNotFoundException();
+        }
+        this.mPath = file.getAbsolutePath();
         this.impl.setDataSource(this.mPath);
         if (this.androidImpl != null) {
             this.androidImpl.setDataSource(this.mPath);
