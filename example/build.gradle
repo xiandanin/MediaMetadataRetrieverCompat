@@ -28,5 +28,6 @@ dependencies {
     compile 'com.android.support:recyclerview-v7:' + rootProject.ext.android.supportVersion
     compile 'io.reactivex.rxjava2:rxjava:2.1.0'
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
     compile project(':media-metadata-retriever-compat')
 }
