@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.dyhdyh.compat.mmrc.MediaMetadataRetrieverCompat;
+import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
 
 import java.io.File;
 
@@ -55,6 +56,9 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     }
 
     public void clickMediaMetadata(View v) {
+        String toastText = String.format("当前使用%s解析器", mmrc.getMediaMetadataRetriever() instanceof FFmpegMediaMetadataRetrieverImpl ? "FFmpeg" : "原生");
+        Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
+
         String path = TextUtils.isEmpty(ed.getText()) ? testFile.getAbsolutePath() : ed.getText().toString();
         if (!new File(path).exists()) {
             Toast.makeText(this, "请输入正确的视频路径", Toast.LENGTH_SHORT).show();
