@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         } catch (FileNotFoundException e) {
             e.printStackTrace();
             Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
+            return;
         }
 
         //获取元数据

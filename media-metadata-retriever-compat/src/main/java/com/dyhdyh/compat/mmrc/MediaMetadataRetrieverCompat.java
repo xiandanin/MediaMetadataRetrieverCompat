@@ -91,7 +91,7 @@ public class MediaMetadataRetrieverCompat {
 
     public void setMediaDataSource(File file) throws FileNotFoundException {
         if (!file.exists()) {
-            new FileNotFoundException();
+            throw new FileNotFoundException();
         }
         this.mPath = file.getAbsolutePath();
         this.impl.setDataSource(this.mPath);
