@@ -1,8 +1,12 @@
 package com.dyhdyh.compat.mmrc.example;
 
+import android.Manifest;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,6 +21,7 @@ import com.dyhdyh.compat.mmrc.MediaMetadataRetrieverCompat;
 import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -47,6 +52,8 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         rv = (RecyclerView) findViewById(R.id.rv);
         rg.setOnCheckedChangeListener(this);
 
+        checkPermission();
+
         testFile = new File(getCacheDir(), "test.mp4");
         FileUtils.copyAssetFile(this, "test.mp4", testFile);
 
@@ -60,12 +67,14 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         Toast.makeText(this, toastText, Toast.LENGTH_SHORT).show();
 
         String path = TextUtils.isEmpty(ed.getText()) ? testFile.getAbsolutePath() : ed.getText().toString();
-        if (!new File(path).exists()) {
-            Toast.makeText(this, "请输入正确的视频路径", Toast.LENGTH_SHORT).show();
-            return;
-        }
+
         //设置路径
-        mmrc.setDataSource(path);
+        try {
+            mmrc.setMediaDataSource(path);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "文件不存在", Toast.LENGTH_SHORT).show();
+        }
 
         //获取元数据
         String width = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_WIDTH);
@@ -167,5 +176,12 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
                 break;
         }
 
+    }
+
+    private void checkPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PermissionChecker.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 0);
+        }
     }
 }
