@@ -91,11 +91,16 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
         bindMetadata(width, height, rotation, numTracks, title, album, albumArtist, author, duration, framerate);
 
-        //获取缩略图
-        final int thumbnailCount = (int) (Long.parseLong(duration) / 1000);
-        final int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
-        final int thumbnailHeight = (int) ((float) thumbnailWidth / Integer.parseInt(width) * Integer.parseInt(height));
-        bindThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
+        try {
+            //获取缩略图
+            final int thumbnailCount = (int) (Long.parseLong(duration) / 1000);
+            final int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
+            final int thumbnailHeight = (int) ((float) thumbnailWidth / Integer.parseInt(width) * Integer.parseInt(height));
+            bindThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
+        }catch (Exception e){
+            e.printStackTrace();
+            Toast.makeText(this, "获取缩略图失败", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void bindMetadata(String width, String height, String rotation, String numTracks, String title, String album, String albumArtist, String author, String duration, String frameRate) {
