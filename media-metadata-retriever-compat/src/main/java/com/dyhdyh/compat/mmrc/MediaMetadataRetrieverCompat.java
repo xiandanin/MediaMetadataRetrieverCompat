@@ -151,10 +151,10 @@ public class MediaMetadataRetrieverCompat {
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height, float rotate) {
-        boolean isRotate = isRotate(rotate);
+        boolean isVertical = isVertical(rotate);
         Bitmap frame = getScaledFrameAtTime(timeUs, option,
-                isRotate ? height : width, isRotate ? width : height);
-        if (isRotate) {
+                isVertical ? height : width, isVertical ? width : height);
+        if (isRotate(rotate)) {
             return BitmapRotateTransform.transform(frame, rotate);
         }
         return frame;
@@ -193,8 +193,19 @@ public class MediaMetadataRetrieverCompat {
     }
 
 
-    private boolean isRotate(float rotate) {
+    private boolean isVertical(float rotate) {
         float abs = Math.abs(rotate);
         return abs == 90 || abs == 270;
+    }
+
+
+    /**
+     * 是否有角度
+     * @param rotate
+     * @return
+     */
+    public static boolean isRotate(float rotate) {
+        float abs = Math.abs(rotate);
+        return abs % 360 != 0;
     }
 }
