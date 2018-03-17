@@ -56,7 +56,7 @@ String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KE
 ...
 ```
 
-## __获取缩略图__
+## __获取缩略图（耗时操作）__
 ```
 //获取第一帧原尺寸图片
 mmrc.getFrameAtTime();
@@ -70,6 +70,3 @@ mmrc.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, w
 //获取指定位置指定宽高并且旋转的缩略图
 mmrc.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height, rotate);
 ```
-
-
-###### Android交流群：[146262062](https://jq.qq.com/?_wv=1027&k=47XqOHO)
