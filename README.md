@@ -2,7 +2,7 @@
 多媒体元数据兼容方案 - 支持获取视频缩略图、视频信息  
 
 ## __简介__
-MediaMetadataRetrieverCompat 内部有两种实现，各有特点  
+MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初始化方式)  
 
 `FFmpegMediaMetadataRetriever`  
 &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)，体积大但取帧速度快  
