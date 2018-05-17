@@ -49,7 +49,7 @@ MediaMetadataRetrieverCompat mmrc = new MediaMetadataRetrieverCompat();
 ```
 ## __设置路径__
 ```
-mmrc.setDataSource(path);
+mmrc.setMediaDataSource(path);
 ```
 
 ## __获取Metadata信息__
@@ -67,7 +67,8 @@ String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KE
 ...
 ```
 
-## __获取缩略图（耗时操作）__
+## __获取本地视频缩略图__
+耗时操作，请放在子线程
 ```
 //获取第一帧原尺寸图片
 mmrc.getFrameAtTime();
