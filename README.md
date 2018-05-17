@@ -23,8 +23,19 @@ MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初�
 ```
 compile 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.6'
 
-//可选(如果不引入则只使用原生API)
+//可选(全平台，如果不引入会自动使用原生API)
 compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+```
+
+## __单平台引入__
+为了减小体积，可以只引入某个平台
+```
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi:1.0.14'
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-x86:1.0.14'
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-mips:1.0.14'
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-x86_64:1.0.14'
+compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-arm64-v8a:1.0.14'
 ```
 
 ## __初始化（三种模式）__
