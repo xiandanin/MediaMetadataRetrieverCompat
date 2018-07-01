@@ -46,10 +46,20 @@ public class MediaMetadataRetrieverCompat {
     public static final int RETRIEVER_FFMPEG = 0;
     public static final int RETRIEVER_ANDROID = 1;
 
+    public static MediaMetadataRetrieverCompat create() {
+        return new MediaMetadataRetrieverCompat(RETRIEVER_FFMPEG);
+    }
+
+    public static MediaMetadataRetrieverCompat create(int type) {
+        return new MediaMetadataRetrieverCompat(type);
+    }
+
+    @Deprecated
     public MediaMetadataRetrieverCompat() {
         this(RETRIEVER_FFMPEG);
     }
 
+    @Deprecated
     public MediaMetadataRetrieverCompat(int type) {
         if (type == RETRIEVER_FFMPEG) {
             try {
@@ -201,6 +211,7 @@ public class MediaMetadataRetrieverCompat {
 
     /**
      * 是否有角度
+     *
      * @param rotate
      * @return
      */

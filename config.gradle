@@ -4,11 +4,11 @@ ext {
                     versionCode      : 7,
                     versionName      : "1.0.6",
 
-                    compileSdkVersion: 25,
-                    buildToolsVersion: "25.0.2",
+                    compileSdkVersion: 26,
+                    buildToolsVersion: "26.0.2",
                     minSdkVersion    : 14,
-                    targetSdkVersion : 25,
-                    supportVersion   : "25.3.0",
+                    targetSdkVersion : 26,
+                    supportVersion   : "26.1.0",
             ]
 
     jcenter =

@@ -57,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         testFile = new File(getCacheDir(), "test.mp4");
         FileUtils.copyAssetFile(this, "test.mp4", testFile);
 
-        mmrc = new MediaMetadataRetrieverCompat();
+        mmrc = MediaMetadataRetrieverCompat.create();
         //mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
         //mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);
     }
@@ -97,7 +97,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
             final int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
             final int thumbnailHeight = (int) ((float) thumbnailWidth / Integer.parseInt(width) * Integer.parseInt(height));
             bindThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             Toast.makeText(this, "获取缩略图失败", Toast.LENGTH_SHORT).show();
         }
