@@ -71,7 +71,6 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         testFile = new File(getExternalCacheDir(), "test.mp4");
 
         mmrc = MediaMetadataRetrieverCompat.create();
-        mmrc.setDataSource(context, uri);
         //mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);
         //mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
     }
