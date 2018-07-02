@@ -21,35 +21,40 @@ MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初�
 
 ## __快速开始__
 ```
-compile 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.6'
+//核心库 必选
+implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.7'
 
-//可选(全平台，如果不引入会自动使用原生API)
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
-```
+//当需要FFmpegMediaMetadataRetriever时必选
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
 
-## __单平台引入__
-为了减小体积，可以只引入某个平台
-```
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi:1.0.14'
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-x86:1.0.14'
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-mips:1.0.14'
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-x86_64:1.0.14'
-compile 'com.github.wseemann:FFmpegMediaMetadataRetriever-arm64-v8a:1.0.14'
+//可选平台
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi:1.0.14'
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-arm64-v8a:1.0.14'
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-mips:1.0.14'
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-x86:1.0.14'
+implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-x86_64:1.0.14'
 ```
 
 ## __初始化（三种模式）__
 ```
 //自动 - 推荐  
-MediaMetadataRetrieverCompat mmrc = new MediaMetadataRetrieverCompat();  
+MediaMetadataRetrieverCompat mmrc = MediaMetadataRetrieverCompat.create();  
 //FFmpeg  
-//MediaMetadataRetrieverCompat  mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);  
+//MediaMetadataRetrieverCompat  mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);  
 //原生API  
-//MediaMetadataRetrieverCompat  mmrc = new MediaMetadataRetrieverCompat(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
+//MediaMetadataRetrieverCompat  mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
 ```
-## __设置路径__
+## __设置输入源__
 ```
-mmrc.setMediaDataSource(path);
+//本地文件
+mmrc.setDataSource(inputFile);
+
+//网络视频(建议放在子线程)
+mmrc.setDataSource(url, headers);
+
+//Uri
+mmrc.setDataSource(context, uri);
 ```
 
 ## __获取Metadata信息__
@@ -68,7 +73,8 @@ String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KE
 ```
 
 ## __获取本地视频缩略图__
-耗时操作，请放在子线程
+耗时操作，请放在子线程  
+
 ```
 //获取第一帧原尺寸图片
 mmrc.getFrameAtTime();
