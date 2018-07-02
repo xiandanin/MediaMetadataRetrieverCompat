@@ -6,6 +6,9 @@ import android.net.Uri;
 
 import com.dyhdyh.compat.mmrc.IMediaMetadataRetriever;
 
+import java.io.FileDescriptor;
+import java.util.Map;
+
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 /**
@@ -28,6 +31,21 @@ public class FFmpegMediaMetadataRetrieverImpl implements IMediaMetadataRetriever
     @Override
     public void setDataSource(Context context, Uri uri) {
         this.mRetriever.setDataSource(context, uri);
+    }
+
+    @Override
+    public void setDataSource(String uri, Map<String, String> headers) {
+        this.mRetriever.setDataSource(uri, headers);
+    }
+
+    @Override
+    public void setDataSource(FileDescriptor fd, long offset, long length) {
+        this.mRetriever.setDataSource(fd, offset, length);
+    }
+
+    @Override
+    public void setDataSource(FileDescriptor fd) {
+        this.mRetriever.setDataSource(fd);
     }
 
     @Override

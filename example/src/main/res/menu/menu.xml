@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:onClick="clickVideo"
+        android:title="测试本地视频" />
+    <item
+        android:onClick="clickAudio"
+        android:title="测试音频" />
+    <item
+        android:onClick="clickOnlineVideo"
+        android:title="测试网络视频" />
+</menu>

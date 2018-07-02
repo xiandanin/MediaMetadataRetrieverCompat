@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">MediaMetadataRetrieverCompat</string>
-    <string name="hint_video_path">请输入视频路径，为空则使用默认视频</string>
+    <string name="hint_video_path">输入视频路径，支持本地文件和网络视频</string>
 </resources>

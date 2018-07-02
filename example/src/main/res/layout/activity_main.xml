@@ -57,13 +57,20 @@
         android:onClick="clickMediaMetadata"
         android:text="获取视频信息/缩略图" />
 
-    <TextView
-        android:id="@+id/tv"
+    <RelativeLayout
+        android:id="@+id/layout_info"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content">
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        <TextView
+            android:id="@+id/tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <android.support.v7.widget.RecyclerView
+            android:layout_below="@id/tv"
+            android:id="@+id/rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </RelativeLayout>
 </LinearLayout>

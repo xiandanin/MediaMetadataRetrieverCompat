@@ -1,6 +1,8 @@
 package com.dyhdyh.compat.mmrc;
 
+import android.content.Context;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -10,7 +12,10 @@ import com.dyhdyh.compat.mmrc.transform.BitmapRotateTransform;
 import com.dyhdyh.compat.mmrc.transform.MetadataTransform;
 
 import java.io.File;
+import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * author  dengyuhan
@@ -19,9 +24,10 @@ import java.io.FileNotFoundException;
 public class MediaMetadataRetrieverCompat {
     private final String TAG = "MediaMetadataRetriever";
 
-    private IMediaMetadataRetriever impl;
-    private MediaMetadataRetrieverImpl androidImpl;
-    private String mPath;
+    private IMediaMetadataRetriever mImpl;
+    private MediaMetadataRetrieverImpl mAndroidImpl;
+
+    public static final int VALUE_EMPTY = -1;
 
     public static final int OPTION_PREVIOUS_SYNC = 0x00;
     public static final int OPTION_NEXT_SYNC = 0x01;
@@ -54,11 +60,17 @@ public class MediaMetadataRetrieverCompat {
         return new MediaMetadataRetrieverCompat(type);
     }
 
+    /**
+     * @deprecated {@link MediaMetadataRetrieverCompat#create()}
+     */
     @Deprecated
     public MediaMetadataRetrieverCompat() {
         this(RETRIEVER_FFMPEG);
     }
 
+    /**
+     * @deprecated {@link MediaMetadataRetrieverCompat#create(int)}
+     */
     @Deprecated
     public MediaMetadataRetrieverCompat(int type) {
         if (type == RETRIEVER_FFMPEG) {
@@ -66,25 +78,26 @@ public class MediaMetadataRetrieverCompat {
                 //创建实例前先检查是否引入FFmpegMediaMetadataRetriever
                 Class.forName("wseemann.media.FFmpegMediaMetadataRetriever");
                 //优先ffmpeg
-                this.impl = new FFmpegMediaMetadataRetrieverImpl();
+                this.mImpl = new FFmpegMediaMetadataRetrieverImpl();
             } catch (Exception e) {
                 //不行就自带的
-                this.impl = new MediaMetadataRetrieverImpl();
+                this.mImpl = new MediaMetadataRetrieverImpl();
                 Log.d(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，使用原生API");
                 e.printStackTrace();
             }
+            this.mAndroidImpl = new MediaMetadataRetrieverImpl();
         } else {
-            this.impl = new MediaMetadataRetrieverImpl();
+            this.mImpl = new MediaMetadataRetrieverImpl();
         }
     }
 
     public IMediaMetadataRetriever getMediaMetadataRetriever() {
-        return impl;
+        return mImpl;
     }
 
     /**
      * @param path
-     * @deprecated Use {@link #setMediaDataSource(String)} instead.
+     * @deprecated {@link #setDataSource(File)}
      */
     @Deprecated
     public void setDataSource(String path) {
@@ -95,69 +108,143 @@ public class MediaMetadataRetrieverCompat {
         }
     }
 
+    /**
+     * @param path
+     * @deprecated {@link #setDataSource(File)}
+     */
+    @Deprecated
     public void setMediaDataSource(String path) throws FileNotFoundException {
         setMediaDataSource(new File(path));
     }
 
+    /**
+     * @param file
+     * @deprecated {@link #setDataSource(File)}
+     */
+    @Deprecated
     public void setMediaDataSource(File file) throws FileNotFoundException {
-        if (!file.exists()) {
-            throw new FileNotFoundException();
+        setDataSource(file);
+    }
+
+    public void setDataSource(File inputFile) throws FileNotFoundException {
+        if (inputFile == null || !inputFile.exists()) {
+            throw new FileNotFoundException("文件不存在 " + (inputFile != null ? inputFile.getAbsolutePath() : ""));
         }
-        this.mPath = file.getAbsolutePath();
-        this.impl.setDataSource(this.mPath);
-        if (this.androidImpl != null) {
-            this.androidImpl.setDataSource(this.mPath);
+        String inputPath = inputFile.getAbsolutePath();
+        mImpl.setDataSource(inputPath);
+        if (mAndroidImpl != null) {
+            mAndroidImpl.setDataSource(inputPath);
         }
     }
 
+    public void setDataSource(Context context, Uri uri) {
+        mImpl.setDataSource(context, uri);
+        if (mAndroidImpl != null) {
+            mAndroidImpl.setDataSource(context, uri);
+        }
+    }
+
+    /**
+     * 网络媒体资源
+     *
+     * @param uri
+     * @param headers
+     */
+    public void setDataSource(String uri, Map<String, String> headers) {
+        if (headers == null) {
+            headers = new HashMap<>();
+        }
+        mImpl.setDataSource(uri, headers);
+        if (mAndroidImpl != null) {
+            mAndroidImpl.setDataSource(uri, headers);
+        }
+    }
+
+    public void setDataSource(FileDescriptor fd, long offset, long length) {
+        mImpl.setDataSource(fd, offset, length);
+        if (mAndroidImpl != null) {
+            mAndroidImpl.setDataSource(fd, offset, length);
+        }
+    }
+
+    public void setDataSource(FileDescriptor fd) {
+        mImpl.setDataSource(fd);
+        if (mAndroidImpl != null) {
+            mAndroidImpl.setDataSource(fd);
+        }
+    }
+
+
     public String extractMetadata(int keyCode) {
-        String keyCodeString = MetadataTransform.transform(this.impl.getClass(), keyCode);
+        String keyCodeString = MetadataTransform.transform(this.mImpl.getClass(), keyCode);
         if (TextUtils.isEmpty(keyCodeString)) {
             return null;
         }
-        String metadata = this.impl.extractMetadata(keyCodeString);
-        if (metadata == null) {
+        String metadata = mImpl.extractMetadata(keyCodeString);
+        if (metadata == null && mAndroidImpl != null) {
             //如果ffmpeg失败,自带api替代
-            String androidKeyCodeString = MetadataTransform.transform(MediaMetadataRetrieverImpl.class, keyCode);
-            metadata = getAndroidMediaMetadataRetriever().extractMetadata(androidKeyCodeString);
+            String androidKeyCodeString = MetadataTransform.transform(mAndroidImpl.getClass(), keyCode);
+            metadata = mAndroidImpl.extractMetadata(androidKeyCodeString);
         }
+        Log.d(TAG, "extractMetadata : " + keyCode + " = " + metadata);
         return metadata;
     }
 
-    public Bitmap getFrameAtTime() {
-        Bitmap frame = this.impl.getFrameAtTime();
-        if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getFrameAtTime();
-        } else {
-            return frame;
+    public long extractMetadataLong(int keyCode) {
+        try {
+            return Long.parseLong(extractMetadata(keyCode));
+        } catch (Exception e) {
+            return VALUE_EMPTY;
         }
+    }
+
+    public int extractMetadataInt(int keyCode) {
+        try {
+            return Integer.parseInt(extractMetadata(keyCode));
+        } catch (Exception e) {
+            return VALUE_EMPTY;
+        }
+    }
+
+
+    public float extractMetadataFloat(int keyCode) {
+        try {
+            return Float.parseFloat(extractMetadata(keyCode));
+        } catch (Exception e) {
+            return VALUE_EMPTY;
+        }
+    }
+
+    public Bitmap getFrameAtTime() {
+        Bitmap frame = this.mImpl.getFrameAtTime();
+        if (frame == null && mAndroidImpl != null) {
+            return mAndroidImpl.getFrameAtTime();
+        }
+        return frame;
     }
 
     public Bitmap getFrameAtTime(long timeUs, int option) {
-        Bitmap frame = this.impl.getFrameAtTime(timeUs, option);
-        if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getFrameAtTime(timeUs, option);
-        } else {
-            return frame;
+        Bitmap frame = this.mImpl.getFrameAtTime(timeUs, option);
+        if (frame == null && mAndroidImpl != null) {
+            return mAndroidImpl.getFrameAtTime(timeUs, option);
         }
+        return frame;
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int width, int height) {
-        Bitmap frame = this.impl.getScaledFrameAtTime(timeUs, width, height);
-        if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getScaledFrameAtTime(timeUs, width, height);
-        } else {
-            return frame;
+        Bitmap frame = this.mImpl.getScaledFrameAtTime(timeUs, width, height);
+        if (frame == null && mAndroidImpl != null) {
+            return mAndroidImpl.getScaledFrameAtTime(timeUs, width, height);
         }
+        return frame;
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height) {
-        Bitmap frame = this.impl.getScaledFrameAtTime(timeUs, option, width, height);
-        if (frame == null) {
-            return getAndroidMediaMetadataRetriever().getScaledFrameAtTime(timeUs, option, width, height);
-        } else {
-            return frame;
+        Bitmap frame = this.mImpl.getScaledFrameAtTime(timeUs, option, width, height);
+        if (frame == null && mAndroidImpl != null) {
+            return mAndroidImpl.getScaledFrameAtTime(timeUs, option, width, height);
         }
+        return frame;
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height, float rotate) {
@@ -171,35 +258,27 @@ public class MediaMetadataRetrieverCompat {
     }
 
     public Bitmap getScaledFrameAtTime(long timeUs, int option, float widthScale, float heightScale, float rotate) {
-        String widthText = extractMetadata(METADATA_KEY_VIDEO_WIDTH);
-        String heightText = extractMetadata(METADATA_KEY_VIDEO_HEIGHT);
-        int width = TextUtils.isEmpty(widthText) ? 0 : (int) (Integer.parseInt(widthText) * widthScale);
-        int height = TextUtils.isEmpty(heightText) ? 0 : (int) (Integer.parseInt(heightText) * heightScale);
+        int widthInt = extractMetadataInt(METADATA_KEY_VIDEO_WIDTH);
+        int heightInt = extractMetadataInt(METADATA_KEY_VIDEO_HEIGHT);
+        int width = widthInt <= 0 ? 0 : (int) (widthInt * widthScale);
+        int height = heightInt <= 0 ? 0 : (int) (heightInt * heightScale);
         return getScaledFrameAtTime(timeUs, option, width, height, rotate);
     }
 
     public byte[] getEmbeddedPicture() {
-        return impl.getEmbeddedPicture();
+        byte[] embeddedPicture = mImpl.getEmbeddedPicture();
+        if (embeddedPicture == null && mAndroidImpl != null) {
+            return mAndroidImpl.getEmbeddedPicture();
+        }
+        return embeddedPicture;
     }
 
 
     public void release() {
-        impl.release();
-    }
-
-
-    private MediaMetadataRetrieverImpl getAndroidMediaMetadataRetriever() {
-        //如果用的是自带的
-        if (impl instanceof MediaMetadataRetrieverImpl) {
-            return (MediaMetadataRetrieverImpl) impl;
+        mImpl.release();
+        if (mAndroidImpl != null) {
+            mAndroidImpl.release();
         }
-        if (androidImpl == null) {
-            this.androidImpl = new MediaMetadataRetrieverImpl();
-            if (!TextUtils.isEmpty(this.mPath)) {
-                this.androidImpl.setDataSource(this.mPath);
-            }
-        }
-        return this.androidImpl;
     }
 
 

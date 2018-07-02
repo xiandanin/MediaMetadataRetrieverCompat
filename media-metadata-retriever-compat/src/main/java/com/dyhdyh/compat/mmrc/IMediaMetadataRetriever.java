@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import java.io.FileDescriptor;
+import java.util.Map;
+
 /**
  * author  dengyuhan
  * created 2017/5/26 14:49
@@ -11,6 +14,12 @@ import android.net.Uri;
 public interface IMediaMetadataRetriever {
 
     void setDataSource(String path);
+
+    void setDataSource(String uri, Map<String, String> headers);
+
+    void setDataSource(FileDescriptor fd, long offset, long length);
+
+    void setDataSource(FileDescriptor fd);
 
     void setDataSource(Context context, Uri uri);
 
