@@ -1,8 +1,8 @@
 ext {
     android =
             [
-                    versionCode      : 8,
-                    versionName      : "1.0.7",
+                    versionCode      : 9,
+                    versionName      : "1.0.8",
 
                     compileSdkVersion: 26,
                     buildToolsVersion: "26.0.2",
@@ -21,7 +21,7 @@ ext {
                     //项目git地址
                     gitUrl     : "https://github.com/dengyuhan/MediaMetadataRetrieverCompat.git",
                     //项目描述
-                    description: "多媒体元数据兼容方案 - 支持获取视频缩略图、视频信息",
+                    description: "多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频缩略图",
                     //开发者的一些基本信息
                     authorId   : "dengyuhan",
                     authorName : "dengyuhan",

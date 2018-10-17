@@ -4,8 +4,8 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:id="@+id/iv_thumbnail"
         android:scaleType="centerCrop"
+        android:id="@+id/iv_thumbnail"
         android:layout_width="@dimen/thumbnail_size"
         android:layout_height="@dimen/thumbnail_size" />
 </RelativeLayout>

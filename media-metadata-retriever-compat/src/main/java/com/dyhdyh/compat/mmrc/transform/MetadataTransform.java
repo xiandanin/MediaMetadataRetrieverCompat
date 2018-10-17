@@ -6,6 +6,7 @@ import android.util.SparseArray;
 import com.dyhdyh.compat.mmrc.IMediaMetadataRetriever;
 import com.dyhdyh.compat.mmrc.MediaMetadataRetrieverCompat;
 import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
+import com.dyhdyh.compat.mmrc.impl.ImageMediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.impl.MediaMetadataRetrieverImpl;
 
 import wseemann.media.FFmpegMediaMetadataRetriever;
@@ -45,7 +46,8 @@ public class MetadataTransform {
 
         METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_DURATION,
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION)));
+                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_DURATION),
+                        String.valueOf(ImageMediaMetadataRetrieverImpl.METADATA_KEY_DURATION)));
 
         METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_NUM_TRACKS,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_TRACK,
@@ -59,17 +61,20 @@ public class MetadataTransform {
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_DISC,
                         String.valueOf(MediaMetadataRetriever.METADATA_KEY_DISC_NUMBER)));
 
-        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_WIDTH,
+        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_WIDTH,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH,
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)));
+                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH),
+                        String.valueOf(ImageMediaMetadataRetrieverImpl.METADATA_KEY_WIDTH)));
 
-        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_HEIGHT,
+        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_HEIGHT,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT,
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)));
+                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT),
+                        String.valueOf(ImageMediaMetadataRetrieverImpl.METADATA_KEY_HEIGHT)));
 
-        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_ROTATION,
+        METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_ROTATION,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION,
-                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION)));
+                        String.valueOf(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION),
+                        String.valueOf(ImageMediaMetadataRetrieverImpl.METADATA_KEY_ROTATION)));
 
         METADATA_KEYS.put(MediaMetadataRetrieverCompat.METADATA_KEY_CAPTURE_FRAMERATE,
                 new MetadataKey(FFmpegMediaMetadataRetriever.METADATA_KEY_FRAMERATE,
@@ -77,12 +82,14 @@ public class MetadataTransform {
 
     }
 
-    public static String transform(Class<? extends IMediaMetadataRetriever> clazz, int metadataKeyCode) {
-        MetadataKey metadataKey = METADATA_KEYS.get(metadataKeyCode);
+    public static String transform(Class<? extends IMediaMetadataRetriever> clazz, int compatMetadataKeyCode) {
+        MetadataKey metadataKey = METADATA_KEYS.get(compatMetadataKeyCode);
         if (clazz.getName().equals(FFmpegMediaMetadataRetrieverImpl.class.getName())) {
-            return metadataKey.getFfmpegMetadatakey();
+            return metadataKey.getFFmpegMetadataKey();
         } else if (clazz.getName().equals(MediaMetadataRetrieverImpl.class.getName())) {
-            return metadataKey.getMetadatakey();
+            return metadataKey.getMetadataKey();
+        } else if (clazz.getName().equals(ImageMediaMetadataRetrieverImpl.class.getName())) {
+            return metadataKey.getImageMetadataKey();
         }
         return null;
     }

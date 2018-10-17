@@ -5,27 +5,43 @@ package com.dyhdyh.compat.mmrc.transform;
  * created 2017/5/27 10:51
  */
 public class MetadataKey {
-    private String ffmpegMetadatakey;
-    private String metadatakey;
+    private String ffmpegMetadataKey;
+    private String metadataKey;
+    private String imageMetadataKey;
 
-    public MetadataKey(String ffmpegMetadatakey, String metadatakey) {
-        this.ffmpegMetadatakey = ffmpegMetadatakey;
-        this.metadatakey = metadatakey;
+    public MetadataKey(String ffmpegMetadataKey, String metadataKey) {
+        this.ffmpegMetadataKey = ffmpegMetadataKey;
+        this.metadataKey = metadataKey;
+        this.imageMetadataKey = metadataKey;
     }
 
-    public String getFfmpegMetadatakey() {
-        return ffmpegMetadatakey;
+    public MetadataKey(String ffmpegMetadataKey, String metadataKey, String imageMetadataKey) {
+        this.ffmpegMetadataKey = ffmpegMetadataKey;
+        this.metadataKey = metadataKey;
+        this.imageMetadataKey = imageMetadataKey;
     }
 
-    public void setFfmpegMetadatakey(String ffmpegMetadatakey) {
-        this.ffmpegMetadatakey = ffmpegMetadatakey;
+    public String getFFmpegMetadataKey() {
+        return ffmpegMetadataKey;
     }
 
-    public String getMetadatakey() {
-        return metadatakey;
+    public void setFFmpegMetadataKey(String ffmpegMetadataKey) {
+        this.ffmpegMetadataKey = ffmpegMetadataKey;
     }
 
-    public void setMetadatakey(String metadatakey) {
-        this.metadatakey = metadatakey;
+    public String getMetadataKey() {
+        return metadataKey;
+    }
+
+    public void setMetadataKey(String metadataKey) {
+        this.metadataKey = metadataKey;
+    }
+
+    public String getImageMetadataKey() {
+        return imageMetadataKey;
+    }
+
+    public void setImageMetadataKey(String imageMetadataKey) {
+        this.imageMetadataKey = imageMetadataKey;
     }
 }

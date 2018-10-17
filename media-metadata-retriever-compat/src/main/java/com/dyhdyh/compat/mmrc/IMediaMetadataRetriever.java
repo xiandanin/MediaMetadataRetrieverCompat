@@ -4,7 +4,9 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 /**
@@ -13,7 +15,7 @@ import java.util.Map;
  */
 public interface IMediaMetadataRetriever {
 
-    void setDataSource(String path);
+    void setDataSource(File inputFile) throws FileNotFoundException;
 
     void setDataSource(String uri, Map<String, String> headers);
 
@@ -33,7 +35,7 @@ public interface IMediaMetadataRetriever {
 
     byte[] getEmbeddedPicture();
 
-    String extractMetadata(String keyCode);
+    String extractMetadata(int keyCode);
 
     void release();
 }

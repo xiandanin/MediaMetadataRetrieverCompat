@@ -3,19 +3,20 @@ package com.dyhdyh.compat.mmrc;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.net.Uri;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.dyhdyh.compat.mmrc.impl.FFmpegMediaMetadataRetrieverImpl;
+import com.dyhdyh.compat.mmrc.impl.ImageMediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.impl.MediaMetadataRetrieverImpl;
 import com.dyhdyh.compat.mmrc.transform.BitmapRotateTransform;
-import com.dyhdyh.compat.mmrc.transform.MetadataTransform;
 
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 /**
  * author  dengyuhan
@@ -25,7 +26,8 @@ public class MediaMetadataRetrieverCompat {
     private final String TAG = "MediaMetadataRetriever";
 
     private IMediaMetadataRetriever mImpl;
-    private MediaMetadataRetrieverImpl mAndroidImpl;
+    private IMediaMetadataRetriever mOriginalImpl;
+    private IMediaMetadataRetriever mImageImpl;
 
     public static final int VALUE_EMPTY = -1;
 
@@ -44,16 +46,34 @@ public class MediaMetadataRetrieverCompat {
     public static final int METADATA_KEY_NUM_TRACKS = 10;
     public static final int METADATA_KEY_ALBUMARTIST = 13;
     public static final int METADATA_KEY_DISC_NUMBER = 14;
+
+    /**
+     * @deprecated {@link #METADATA_KEY_WIDTH}
+     */
+    @Deprecated
     public static final int METADATA_KEY_VIDEO_WIDTH = 18;
+    /**
+     * @deprecated {@link #METADATA_KEY_HEIGHT}
+     */
+    @Deprecated
     public static final int METADATA_KEY_VIDEO_HEIGHT = 19;
+    /**
+     * @deprecated {@link #METADATA_KEY_ROTATION}
+     */
+    @Deprecated
     public static final int METADATA_KEY_VIDEO_ROTATION = 24;
+
+    public static final int METADATA_KEY_WIDTH = 18;
+    public static final int METADATA_KEY_HEIGHT = 19;
+    public static final int METADATA_KEY_ROTATION = 24;
     public static final int METADATA_KEY_CAPTURE_FRAMERATE = 25;
 
-    public static final int RETRIEVER_FFMPEG = 0;
+    public static final int RETRIEVER_AUTOMATIC = 0;
     public static final int RETRIEVER_ANDROID = 1;
+    public static final int RETRIEVER_FFMPEG = 2;
 
     public static MediaMetadataRetrieverCompat create() {
-        return new MediaMetadataRetrieverCompat(RETRIEVER_FFMPEG);
+        return new MediaMetadataRetrieverCompat(RETRIEVER_AUTOMATIC);
     }
 
     public static MediaMetadataRetrieverCompat create(int type) {
@@ -73,22 +93,22 @@ public class MediaMetadataRetrieverCompat {
      */
     @Deprecated
     public MediaMetadataRetrieverCompat(int type) {
-        if (type == RETRIEVER_FFMPEG) {
+        if (type == RETRIEVER_AUTOMATIC || type == RETRIEVER_FFMPEG) {
             try {
-                //创建实例前先检查是否引入FFmpegMediaMetadataRetriever
+                //创建实例前先检查FFmpegMediaMetadataRetriever是否可用
                 Class.forName("wseemann.media.FFmpegMediaMetadataRetriever");
-                //优先ffmpeg
-                this.mImpl = new FFmpegMediaMetadataRetrieverImpl();
+                this.mOriginalImpl = new FFmpegMediaMetadataRetrieverImpl(type == RETRIEVER_AUTOMATIC);
             } catch (Exception e) {
-                //不行就自带的
-                this.mImpl = new MediaMetadataRetrieverImpl();
-                Log.d(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，使用原生API");
+                //如果不可用 就创建原生实例
+                this.mOriginalImpl = new MediaMetadataRetrieverImpl();
+                Log.d(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，已切换至原生API");
                 e.printStackTrace();
             }
-            this.mAndroidImpl = new MediaMetadataRetrieverImpl();
         } else {
-            this.mImpl = new MediaMetadataRetrieverImpl();
+            this.mOriginalImpl = new MediaMetadataRetrieverImpl();
         }
+        this.mImpl = mOriginalImpl;
+        this.mImageImpl = new ImageMediaMetadataRetrieverImpl();
     }
 
     public IMediaMetadataRetriever getMediaMetadataRetriever() {
@@ -100,20 +120,7 @@ public class MediaMetadataRetrieverCompat {
      * @deprecated {@link #setDataSource(File)}
      */
     @Deprecated
-    public void setDataSource(String path) {
-        try {
-            setMediaDataSource(path);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * @param path
-     * @deprecated {@link #setDataSource(File)}
-     */
-    @Deprecated
-    public void setMediaDataSource(String path) throws FileNotFoundException {
+    public void setMediaDataSource(String path) throws IOException {
         setMediaDataSource(new File(path));
     }
 
@@ -122,26 +129,46 @@ public class MediaMetadataRetrieverCompat {
      * @deprecated {@link #setDataSource(File)}
      */
     @Deprecated
-    public void setMediaDataSource(File file) throws FileNotFoundException {
+    public void setMediaDataSource(File file) throws IOException {
         setDataSource(file);
+    }
+
+
+    /**
+     * @param path
+     */
+    public void setDataSource(String path) {
+        try {
+            setDataSource(new File(path));
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setDataSource(File inputFile) throws FileNotFoundException {
         if (inputFile == null || !inputFile.exists()) {
             throw new FileNotFoundException("文件不存在 " + (inputFile != null ? inputFile.getAbsolutePath() : ""));
         }
-        String inputPath = inputFile.getAbsolutePath();
-        mImpl.setDataSource(inputPath);
-        if (mAndroidImpl != null) {
-            mAndroidImpl.setDataSource(inputPath);
-        }
+        runDynamicSetDataSource(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    mImpl.setDataSource(inputFile);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
     }
 
     public void setDataSource(Context context, Uri uri) {
-        mImpl.setDataSource(context, uri);
-        if (mAndroidImpl != null) {
-            mAndroidImpl.setDataSource(context, uri);
-        }
+        runDynamicSetDataSource(new Runnable() {
+            @Override
+            public void run() {
+                mImpl.setDataSource(context, uri);
+            }
+        });
     }
 
     /**
@@ -151,41 +178,36 @@ public class MediaMetadataRetrieverCompat {
      * @param headers
      */
     public void setDataSource(String uri, Map<String, String> headers) {
-        if (headers == null) {
-            headers = new HashMap<>();
-        }
-        mImpl.setDataSource(uri, headers);
-        if (mAndroidImpl != null) {
-            mAndroidImpl.setDataSource(uri, headers);
-        }
+        Map<String, String> newHeaders = headers == null ? new HashMap<>() : headers;
+        runDynamicSetDataSource(new Runnable() {
+            @Override
+            public void run() {
+                mImpl.setDataSource(uri, newHeaders);
+            }
+        });
     }
 
     public void setDataSource(FileDescriptor fd, long offset, long length) {
-        mImpl.setDataSource(fd, offset, length);
-        if (mAndroidImpl != null) {
-            mAndroidImpl.setDataSource(fd, offset, length);
-        }
+        runDynamicSetDataSource(new Runnable() {
+            @Override
+            public void run() {
+                mImpl.setDataSource(fd, offset, length);
+            }
+        });
     }
 
     public void setDataSource(FileDescriptor fd) {
-        mImpl.setDataSource(fd);
-        if (mAndroidImpl != null) {
-            mAndroidImpl.setDataSource(fd);
-        }
+        runDynamicSetDataSource(new Runnable() {
+            @Override
+            public void run() {
+                mImpl.setDataSource(fd);
+            }
+        });
     }
 
 
     public String extractMetadata(int keyCode) {
-        String keyCodeString = MetadataTransform.transform(this.mImpl.getClass(), keyCode);
-        if (TextUtils.isEmpty(keyCodeString)) {
-            return null;
-        }
-        String metadata = mImpl.extractMetadata(keyCodeString);
-        if (metadata == null && mAndroidImpl != null) {
-            //如果ffmpeg失败,自带api替代
-            String androidKeyCodeString = MetadataTransform.transform(mAndroidImpl.getClass(), keyCode);
-            metadata = mAndroidImpl.extractMetadata(androidKeyCodeString);
-        }
+        String metadata = mImpl.extractMetadata(keyCode);
         Log.d(TAG, "extractMetadata : " + keyCode + " = " + metadata);
         return metadata;
     }
@@ -206,7 +228,6 @@ public class MediaMetadataRetrieverCompat {
         }
     }
 
-
     public float extractMetadataFloat(int keyCode) {
         try {
             return Float.parseFloat(extractMetadata(keyCode));
@@ -215,76 +236,89 @@ public class MediaMetadataRetrieverCompat {
         }
     }
 
+    /**
+     * 获取第一帧bitmap
+     *
+     * @return
+     */
     public Bitmap getFrameAtTime() {
-        Bitmap frame = this.mImpl.getFrameAtTime();
-        if (frame == null && mAndroidImpl != null) {
-            return mAndroidImpl.getFrameAtTime();
-        }
-        return frame;
+        return this.mImpl.getFrameAtTime();
     }
 
+    /**
+     * 获取指定时间的bitmap
+     *
+     * @param timeUs 微秒
+     * @param option {@link #OPTION_PREVIOUS_SYNC} 早于timeUs的同步帧;
+     *               {@link #OPTION_NEXT_SYNC} 晚于timeUs的同步帧;
+     *               {@link #OPTION_CLOSEST_SYNC} 最接近timeUs的同步帧;
+     *               {@link #OPTION_CLOSEST} 最接近timeUs的帧，但可能不是同步帧(性能开销较大).
+     * @return
+     */
     public Bitmap getFrameAtTime(long timeUs, int option) {
-        Bitmap frame = this.mImpl.getFrameAtTime(timeUs, option);
-        if (frame == null && mAndroidImpl != null) {
-            return mAndroidImpl.getFrameAtTime(timeUs, option);
-        }
-        return frame;
+        return this.mImpl.getFrameAtTime(timeUs, option);
     }
 
+    /**
+     * 获取指定时间指定宽高的bitmap
+     *
+     * @param timeUs
+     * @param width
+     * @param height
+     * @return
+     */
     public Bitmap getScaledFrameAtTime(long timeUs, int width, int height) {
-        Bitmap frame = this.mImpl.getScaledFrameAtTime(timeUs, width, height);
-        if (frame == null && mAndroidImpl != null) {
-            return mAndroidImpl.getScaledFrameAtTime(timeUs, width, height);
-        }
-        return frame;
+        return this.mImpl.getScaledFrameAtTime(timeUs, width, height);
     }
 
+    /**
+     * 指定获取方式获取指定时间指定宽高的bitmap
+     *
+     * @param timeUs
+     * @param width
+     * @param height
+     * @return
+     */
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height) {
-        Bitmap frame = this.mImpl.getScaledFrameAtTime(timeUs, option, width, height);
-        if (frame == null && mAndroidImpl != null) {
-            return mAndroidImpl.getScaledFrameAtTime(timeUs, option, width, height);
-        }
-        return frame;
+        return this.mImpl.getScaledFrameAtTime(timeUs, option, width, height);
     }
 
+    /**
+     * 指定获取方式获取指定时间指定宽高的bitmap并根据角度旋转
+     *
+     * @param timeUs
+     * @param option
+     * @param width
+     * @param height
+     * @param rotate
+     * @return
+     * @deprecated 在其它方法已开启自动旋转
+     */
+    @Deprecated
     public Bitmap getScaledFrameAtTime(long timeUs, int option, int width, int height, float rotate) {
-        boolean isVertical = isVertical(rotate);
-        Bitmap frame = getScaledFrameAtTime(timeUs, option,
-                isVertical ? height : width, isVertical ? width : height);
-        if (isRotate(rotate)) {
+        Bitmap frame = getScaledFrameAtTime(timeUs, option, width, height);
+        if (frame != null && isRotate(rotate)) {
             return BitmapRotateTransform.transform(frame, rotate);
         }
         return frame;
     }
 
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, float widthScale, float heightScale, float rotate) {
-        int widthInt = extractMetadataInt(METADATA_KEY_VIDEO_WIDTH);
-        int heightInt = extractMetadataInt(METADATA_KEY_VIDEO_HEIGHT);
-        int width = widthInt <= 0 ? 0 : (int) (widthInt * widthScale);
-        int height = heightInt <= 0 ? 0 : (int) (heightInt * heightScale);
+    @Deprecated
+    public Bitmap getScaledFrameAtTime(long timeUs, int option, float scale, float rotate) {
+        int widthInt = extractMetadataInt(METADATA_KEY_WIDTH);
+        int heightInt = extractMetadataInt(METADATA_KEY_HEIGHT);
+        int width = widthInt <= 0 ? 0 : (int) (widthInt * scale);
+        int height = heightInt <= 0 ? 0 : (int) (heightInt * scale);
         return getScaledFrameAtTime(timeUs, option, width, height, rotate);
     }
 
     public byte[] getEmbeddedPicture() {
-        byte[] embeddedPicture = mImpl.getEmbeddedPicture();
-        if (embeddedPicture == null && mAndroidImpl != null) {
-            return mAndroidImpl.getEmbeddedPicture();
-        }
-        return embeddedPicture;
+        return mImpl.getEmbeddedPicture();
     }
 
 
     public void release() {
         mImpl.release();
-        if (mAndroidImpl != null) {
-            mAndroidImpl.release();
-        }
-    }
-
-
-    private boolean isVertical(float rotate) {
-        float abs = Math.abs(rotate);
-        return abs == 90 || abs == 270;
     }
 
 
@@ -297,5 +331,28 @@ public class MediaMetadataRetrieverCompat {
     public static boolean isRotate(float rotate) {
         float abs = Math.abs(rotate);
         return abs % 360 != 0;
+    }
+
+
+    /**
+     * 根据输入源动态切换引擎
+     *
+     * @param runnable
+     */
+    private void runDynamicSetDataSource(Runnable runnable) {
+        try {
+            //设置输入源前先还原实例
+            this.mImpl = this.mOriginalImpl;
+            runnable.run();
+        } catch (RuntimeException e) {
+            final Pattern pattern = Pattern.compile("(?=.*status)(?=.*0x80000000)^.*$");
+            if (pattern.matcher(e.getMessage()).matches()) {
+                //如果发现输入源的是图片 就切换成图片实例
+                this.mImpl = this.mImageImpl;
+                runnable.run();
+            } else {
+                e.printStackTrace();
+            }
+        }
     }
 }

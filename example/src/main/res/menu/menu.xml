@@ -7,6 +7,12 @@
         android:onClick="clickAudio"
         android:title="测试音频" />
     <item
+        android:onClick="clickGif"
+        android:title="测试GIF" />
+    <item
+        android:onClick="clickJpg"
+        android:title="测试JPG" />
+    <item
         android:onClick="clickOnlineVideo"
         android:title="测试网络视频" />
 </menu>

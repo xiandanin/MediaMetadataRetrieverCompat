@@ -4,10 +4,14 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
+import android.text.TextUtils;
 
 import com.dyhdyh.compat.mmrc.IMediaMetadataRetriever;
+import com.dyhdyh.compat.mmrc.transform.MetadataTransform;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileNotFoundException;
 import java.util.Map;
 
 /**
@@ -23,8 +27,8 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
     }
 
     @Override
-    public void setDataSource(String path) {
-        this.mRetriever.setDataSource(path);
+    public void setDataSource(File inputFile) throws FileNotFoundException {
+        this.mRetriever.setDataSource(inputFile.getAbsolutePath());
     }
 
     @Override
@@ -47,6 +51,7 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
         this.mRetriever.setDataSource(fd);
     }
 
+
     @Override
     public Bitmap getFrameAtTime() {
         return this.mRetriever.getFrameAtTime();
@@ -63,7 +68,8 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
         if (atTime == null) {
             return null;
         }
-        return Bitmap.createScaledBitmap(atTime, width, height, true);
+        final int[] size = makeRotateSize(width, height);
+        return Bitmap.createScaledBitmap(atTime, size[0], size[1], true);
     }
 
     @Override
@@ -72,7 +78,8 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
         if (atTime == null) {
             return null;
         }
-        return Bitmap.createScaledBitmap(atTime, width, height, true);
+        final int[] size = makeRotateSize(width, height);
+        return Bitmap.createScaledBitmap(atTime, size[0], size[1], true);
     }
 
     @Override
@@ -81,12 +88,37 @@ public class MediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
     }
 
     @Override
-    public String extractMetadata(String keyCode) {
-        return this.mRetriever.extractMetadata(Integer.parseInt(keyCode));
+    public String extractMetadata(int keyCode) {
+        String keyCodeString = MetadataTransform.transform(getClass(), keyCode);
+        if (TextUtils.isEmpty(keyCodeString)) {
+            return null;
+        }
+        return this.mRetriever.extractMetadata(Integer.parseInt(keyCodeString));
     }
 
     @Override
     public void release() {
         this.mRetriever.release();
+    }
+
+
+    private int[] makeRotateSize(int sourceWidth, int sourceHeight) {
+        final String rotationString = mRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION);
+        if (!TextUtils.isEmpty(rotationString)) {
+            try {
+                final int rotation = Integer.parseInt(rotationString);
+                if (isVertical(rotation)) {
+                    return new int[]{sourceHeight, sourceWidth};
+                }
+            } catch (NumberFormatException ignored) {
+
+            }
+        }
+        return new int[]{sourceWidth, sourceHeight};
+    }
+
+    private boolean isVertical(float rotate) {
+        float abs = Math.abs(rotate);
+        return abs == 90 || abs == 270;
     }
 }

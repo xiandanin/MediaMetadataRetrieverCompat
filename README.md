@@ -1,28 +1,26 @@
 # MediaMetadataRetrieverCompat
-多媒体元数据兼容方案 - 支持获取视频缩略图、视频信息  
+多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频缩略图  
 
 ## __简介__
 MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初始化方式)  
 
 `FFmpegMediaMetadataRetriever`  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)，体积大但取帧速度快  
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)，对视频资源有增强，但库体积较大  
 
 `MediaMetadataRetriever`   
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于原生API，不会增加apk体积但取帧慢
+&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于原生API
 
 
 ## __示例apk__
-![](screenshot/example-download.png)
+![](screenshot/example-download_1.0.8.png)
 
 ## __效果演示__
-![](screenshot/screenshot_auto.gif)
-![](screenshot/screenshot_ffmpeg.gif)
-![](screenshot/screenshot_android.gif)
+![](screenshot/screenshot.gif)
 
 ## __快速开始__
 ```
 //核心库 必选
-implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.7'
+implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.8'
 
 //当需要FFmpegMediaMetadataRetriever时必选
 implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
@@ -50,7 +48,7 @@ MediaMetadataRetrieverCompat mmrc = MediaMetadataRetrieverCompat.create();
 //本地文件
 mmrc.setDataSource(inputFile);
 
-//网络视频(建议放在子线程)
+//网络资源(需要放在子线程，网络操作将会交给API处理，请慎用，建议自行下载后设置File)
 mmrc.setDataSource(url, headers);
 
 //Uri
@@ -72,8 +70,8 @@ String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KE
 ...
 ```
 
-## __获取本地视频缩略图__
-耗时操作，请放在子线程  
+## __获取缩略图__
+耗时操作，请放在子线程，获取到的缩略图会根据资源信息自动旋转  
 
 ```
 //获取第一帧原尺寸图片
@@ -84,7 +82,4 @@ mmrc.getFrameAtTime(timeUs, option);
 
 //获取指定位置指定宽高的缩略图
 mmrc.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height);
-
-//获取指定位置指定宽高并且旋转的缩略图
-mmrc.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height, rotate);
 ```

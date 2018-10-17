@@ -25,11 +25,7 @@ public class ThumbnailAdapter extends RecyclerView.Adapter<ThumbnailAdapter.Hold
 
     @Override
     public void onBindViewHolder(Holder holder, int position) {
-        if (bitmaps[position] == null) {
-            holder.iv_thumbnail.setImageResource(R.mipmap.ic_launcher);
-        } else {
-            holder.iv_thumbnail.setImageBitmap(bitmaps[position]);
-        }
+        holder.iv_thumbnail.setImageBitmap(bitmaps[position]);
     }
 
     @Override

@@ -55,7 +55,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="clickMediaMetadata"
-        android:text="获取视频信息/缩略图" />
+        android:text="获取媒体数据/缩略图" />
 
     <RelativeLayout
         android:id="@+id/layout_info"

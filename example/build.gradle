@@ -33,5 +33,6 @@ dependencies {
 
     implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
     implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
+    implementation 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
     compile project(':media-metadata-retriever-compat')
 }

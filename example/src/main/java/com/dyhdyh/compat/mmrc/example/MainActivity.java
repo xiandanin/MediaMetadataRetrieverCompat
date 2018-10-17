@@ -43,10 +43,10 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     RecyclerView rv;
     View layout_info;
 
-    private File testFile;
-
     private ThumbnailAdapter mThumbnailAdapter;
     private MediaMetadataRetrieverCompat mmrc;
+
+    private Disposable mThumbnailDisposable;
 
     private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
 
@@ -68,15 +68,15 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
         AssetsManager.copyAsset(this, new AssetFile(), getExternalCacheDir());
 
-        testFile = new File(getExternalCacheDir(), "test.mp4");
-
         mmrc = MediaMetadataRetrieverCompat.create();
         //mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);
         //mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
+
+
     }
 
     public void clickMediaMetadata(View v) {
-        final String path = TextUtils.isEmpty(ed.getText()) ? testFile.getAbsolutePath() : ed.getText().toString();
+        final String path = TextUtils.isEmpty(ed.getText()) ? new File(getExternalCacheDir(), "test.mp4").getAbsolutePath() : ed.getText().toString();
 
         //这里示例用子线程 实际开发中根据需求
         Observable.create(new ObservableOnSubscribe<String>() {
@@ -89,14 +89,6 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
                     } else {
                         mmrc.setDataSource(new File(path));
                     }
-                    //获取缩略图
-                    long duration = mmrc.extractMetadataLong(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION);
-                    int width = mmrc.extractMetadataInt(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_WIDTH);
-                    int height = mmrc.extractMetadataInt(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_HEIGHT);
-                    int thumbnailCount = (int) Math.max(1, Math.min(10, duration / 1000));
-                    int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
-                    final int thumbnailHeight = (int) ((float) thumbnailWidth / width * height);
-                    buildThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
                     s.onNext(buildMetadataInfo());
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -114,6 +106,15 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
                     @Override
                     public void onNext(String s) {
+                        //获取缩略图
+                        long duration = mmrc.extractMetadataLong(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION);
+                        int width = mmrc.extractMetadataInt(MediaMetadataRetrieverCompat.METADATA_KEY_WIDTH);
+                        int height = mmrc.extractMetadataInt(MediaMetadataRetrieverCompat.METADATA_KEY_HEIGHT);
+                        int thumbnailCount = (int) Math.max(1, Math.min(10, duration / 1000));
+                        int thumbnailWidth = getResources().getDimensionPixelSize(R.dimen.thumbnail_size);
+                        final int thumbnailHeight = (int) ((float) thumbnailWidth / width * height);
+                        buildThumbnail(thumbnailCount, thumbnailWidth, thumbnailHeight);
+
                         LoadingBar.cancel(layout_info);
                         tv.setText(s);
                     }
@@ -132,12 +133,12 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         sb.append("API类型：");
         sb.append(mmrc.getMediaMetadataRetriever().getClass().getSimpleName());
         sb.append("\n");
-        String width = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_WIDTH);
+        String width = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_WIDTH);
         if (width != null) {
             sb.append("\n宽：");
             sb.append(width);
         }
-        String height = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_HEIGHT);
+        String height = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_HEIGHT);
         if (height != null) {
             sb.append("\n高：");
             sb.append(height);
@@ -150,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
             sb.append(duration);
             sb.append("毫秒）");
         }
-        String rotation = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_ROTATION);
+        String rotation = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_ROTATION);
         if (rotation != null) {
             sb.append("\n旋转角度：");
             sb.append(rotation);
@@ -189,7 +190,13 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     }
 
     private void buildThumbnail(final int count, final int width, final int height) {
-        mThumbnailAdapter = null;
+        if (mThumbnailDisposable != null && mThumbnailDisposable.isDisposed()) {
+            mThumbnailDisposable.dispose();
+        }
+
+        mThumbnailAdapter = new ThumbnailAdapter(count);//每秒取1帧
+        rv.setAdapter(mThumbnailAdapter);
+
         //取帧是耗时的操作,需要放在子线程
         Observable.create(new ObservableOnSubscribe<ThumbnailBitmap>() {
             @Override
@@ -211,13 +218,13 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         }).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new SimpleObserver<ThumbnailBitmap>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mThumbnailDisposable = d;
+                    }
 
                     @Override
                     public void onNext(ThumbnailBitmap bitmap) {
-                        if (mThumbnailAdapter == null) {
-                            mThumbnailAdapter = new ThumbnailAdapter(count);//每秒取1帧
-                            rv.setAdapter(mThumbnailAdapter);
-                        }
                         //刷新adapter
                         mThumbnailAdapter.setThumbnail(bitmap.getIndex(), bitmap.getBitmap());
                     }
@@ -280,6 +287,16 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
     public void clickAudio(MenuItem item) {
         ed.setText(new File(getExternalCacheDir(), "test_audio.mp3").getAbsolutePath());
+        clickMediaMetadata(null);
+    }
+
+    public void clickJpg(MenuItem item) {
+        ed.setText(new File(getExternalCacheDir(), "test.jpg").getAbsolutePath());
+        clickMediaMetadata(null);
+    }
+
+    public void clickGif(MenuItem item) {
+        ed.setText(new File(getExternalCacheDir(), "test.gif").getAbsolutePath());
         clickMediaMetadata(null);
     }
 }
