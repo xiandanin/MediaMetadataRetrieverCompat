@@ -48,7 +48,7 @@ MediaMetadataRetrieverCompat mmrc = MediaMetadataRetrieverCompat.create();
 //本地文件
 mmrc.setDataSource(inputFile);
 
-//网络资源(需要放在子线程，网络操作将会交给API处理，请慎用，建议自行下载后设置File)
+//网络资源(需要放在子线程，每次调用都会下载视频，请慎用，建议自行下载后设置File)
 mmrc.setDataSource(url, headers);
 
 //Uri
