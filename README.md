@@ -20,7 +20,7 @@ MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初�
 ## __快速开始__
 ```
 //核心库 必选
-implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.8'
+implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.9'
 
 //当需要FFmpegMediaMetadataRetriever时必选
 implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
