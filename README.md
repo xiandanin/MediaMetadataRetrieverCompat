@@ -68,6 +68,16 @@ String author = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_A
 String duration = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION);
 String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_CAPTURE_FRAMERATE);
 ...
+
+//带转换类型和默认值的 基本类型的默认值是-1
+long value = extractMetadataLong(keyCode);
+Long value = extractMetadataLong(keyCode, defaultValue);
+
+int value = extractMetadataInt(keyCode);
+Integer value = extractMetadataInteger(keyCode, defaultValue);
+
+float value = extractMetadataFloat(keyCode);
+Float value = extractMetadataFloat(keyCode, defaultValue);
 ```
 
 ## __获取缩略图__

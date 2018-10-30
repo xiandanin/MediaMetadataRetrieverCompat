@@ -213,26 +213,38 @@ public class MediaMetadataRetrieverCompat {
     }
 
     public long extractMetadataLong(int keyCode) {
+        return extractMetadataLong(keyCode, (long) VALUE_EMPTY);
+    }
+
+    public Long extractMetadataLong(int keyCode, Long defaultValue) {
         try {
             return Long.parseLong(extractMetadata(keyCode));
         } catch (Exception e) {
-            return VALUE_EMPTY;
+            return defaultValue;
         }
     }
 
     public int extractMetadataInt(int keyCode) {
+        return extractMetadataInteger(keyCode, VALUE_EMPTY);
+    }
+
+    public Integer extractMetadataInteger(int keyCode, Integer defaultValue) {
         try {
             return Integer.parseInt(extractMetadata(keyCode));
         } catch (Exception e) {
-            return VALUE_EMPTY;
+            return defaultValue;
         }
     }
 
     public float extractMetadataFloat(int keyCode) {
+        return extractMetadataFloat(keyCode, (float) VALUE_EMPTY);
+    }
+
+    public Float extractMetadataFloat(int keyCode, Float defaultValue) {
         try {
             return Float.parseFloat(extractMetadata(keyCode));
         } catch (Exception e) {
-            return VALUE_EMPTY;
+            return defaultValue;
         }
     }
 
