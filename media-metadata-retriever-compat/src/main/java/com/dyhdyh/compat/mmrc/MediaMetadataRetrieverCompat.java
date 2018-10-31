@@ -101,8 +101,10 @@ public class MediaMetadataRetrieverCompat {
             } catch (Exception e) {
                 //如果不可用 就创建原生实例
                 this.mOriginalImpl = new MediaMetadataRetrieverImpl();
-                Log.d(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，已切换至原生API");
-                e.printStackTrace();
+                Log.e(TAG, "FFmpegMediaMetadataRetrieverImpl初始化失败，已切换至原生API");
+                if (!(e instanceof ClassNotFoundException)) {
+                    e.printStackTrace();
+                }
             }
         } else {
             this.mOriginalImpl = new MediaMetadataRetrieverImpl();
