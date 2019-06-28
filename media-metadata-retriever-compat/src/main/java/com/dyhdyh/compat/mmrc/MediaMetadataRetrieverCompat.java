@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
  * created 2017/5/26 14:48
  */
 public class MediaMetadataRetrieverCompat {
-    private final String TAG = "MediaMetadataRetriever";
+    private final String TAG = "MediaRetriever";
 
     private IMediaMetadataRetriever mImpl;
     private IMediaMetadataRetriever mOriginalImpl;
@@ -359,7 +359,7 @@ public class MediaMetadataRetrieverCompat {
             this.mImpl = this.mOriginalImpl;
             runnable.run();
         } catch (RuntimeException e) {
-            final Pattern pattern = Pattern.compile("(?=.*status)(?=.*0x80000000)^.*$");
+            final Pattern pattern = Pattern.compile("(?=.*status)(?=.*0x80000000|.*0xFFFFFFFF)^.*$");
             if (pattern.matcher(e.getMessage()).matches()) {
                 //如果发现输入源的是图片 就切换成图片实例
                 this.mImpl = this.mImageImpl;

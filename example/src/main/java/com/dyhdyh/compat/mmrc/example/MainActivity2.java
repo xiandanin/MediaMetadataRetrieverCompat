@@ -2,7 +2,6 @@ package com.dyhdyh.compat.mmrc.example;
 
 import android.Manifest;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.v4.app.ActivityCompat;
@@ -12,7 +11,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,17 +22,12 @@ import android.widget.Toast;
 import com.dyhdyh.compat.mmrc.MediaMetadataRetrieverCompat;
 import com.dyhdyh.compat.mmrc.example.adapter.ExampleAdapter;
 import com.dyhdyh.widget.loading.bar.LoadingBar;
-import com.google.webp.libwebp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.TimeZone;
 
+import in.xiandan.mmrc.datasource.FileSource;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -43,7 +36,7 @@ import io.reactivex.annotations.NonNull;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
+public class MainActivity2 extends AppCompatActivity implements RadioGroup.OnCheckedChangeListener {
     TextView tv;
     RadioGroup rg;
     EditText ed;
@@ -58,10 +51,6 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
     private Disposable mThumbnailDisposable;
 
     private SimpleDateFormat mDateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
-
-    static {
-        System.loadLibrary("webp");
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,28 +81,8 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
         bindExampleRecyclerView(rv_video, "sample-video");
     }
 
-    private byte[] getBytes(File file) {
-        byte[] buffer = null;
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
-            byte[] b = new byte[1000];
-            int n;
-            while ((n = fis.read(b)) != -1) {
-                bos.write(b, 0, n);
-            }
-            fis.close();
-            bos.close();
-            buffer = bos.toByteArray();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return buffer;
-    }
-
     private void bindExampleRecyclerView(RecyclerView recyclerView, String dir) {
+
         recyclerView.setLayoutManager(new GridLayoutManager(this, 4));
         final ExampleAdapter adapter = new ExampleAdapter(this, dir);
         adapter.setOnItemClickListener(new ExampleAdapter.OnItemClickListener() {
@@ -122,16 +91,6 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
                 mInputUri = exampleFile.getAbsolutePath();
 
                 clickMediaMetadata(null);
-
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inJustDecodeBounds = true;
-                BitmapFactory.decodeFile(exampleFile.getAbsolutePath(), options);
-                final byte[] bytes = libwebp.WebPDecodeARGB(getBytes(exampleFile), exampleFile.length(), new int[]{options.outWidth}, new int[]{options.outHeight});
-                Log.d("--------->",bytes+"--->"+bytes.length);
-                int[] pixels = new int[bytes.length / 4];
-                ByteBuffer.wrap(bytes).asIntBuffer().get(pixels);
-                Bitmap bitmap =  Bitmap.createBitmap(pixels, options.outWidth, options.outHeight, Bitmap.Config.ARGB_8888);
-                Log.d("--------->",bitmap+"---?"+bytes+"--->"+bytes.length);
             }
         });
         recyclerView.setAdapter(adapter);
@@ -140,6 +99,49 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
 
     public void clickMediaMetadata(View v) {
+        mThumbnailAdapter = new ThumbnailAdapter(2);//每秒取1帧
+        rv.setAdapter(mThumbnailAdapter);
+        //取帧是耗时的操作,需要放在子线程
+        Observable.create(new ObservableOnSubscribe<ThumbnailBitmap>() {
+            @Override
+            public void subscribe(@NonNull ObservableEmitter<ThumbnailBitmap> s) throws Exception {
+                try {
+                    final in.xiandan.mmrc.MediaMetadataRetrieverCompat compat = in.xiandan.mmrc.MediaMetadataRetrieverCompat.create(new FileSource(mInputUri));
+                    for (int i = 0; i < mThumbnailAdapter.getItemCount(); i++) {
+                        Bitmap atTime = compat.getScaledFrameAtTime(i * 1000 * 1000, MediaMetadataRetrieverCompat.OPTION_CLOSEST, 300, 300);
+                        final String simpleName = compat.getRetriever().getClass().getSimpleName();
+                        s.onNext(new ThumbnailBitmap(simpleName, i, atTime));
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    s.onError(e);
+                }
+                s.onComplete();
+            }
+        }).subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new SimpleObserver<ThumbnailBitmap>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        mThumbnailDisposable = d;
+                    }
+
+                    @Override
+                    public void onNext(ThumbnailBitmap bitmap) {
+                        tv.setText(bitmap.getRetrieverName());
+                        //刷新adapter
+                        mThumbnailAdapter.setThumbnail(bitmap.getIndex(), bitmap.getBitmap());
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        Toast.makeText(MainActivity2.this, "获取缩略图失败 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+
+                });
+    }
+
+    public void clickMediaMetadataV1(View v) {
         //这里示例用子线程 实际开发中根据需求
         Observable.create(new ObservableOnSubscribe<String>() {
             @Override
@@ -184,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
                     @Override
                     public void onError(Throwable e) {
                         LoadingBar.cancel(layout_info);
-                        Toast.makeText(MainActivity.this, "解析失败 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity2.this, "解析失败 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                 });
@@ -293,7 +295,7 @@ public class MainActivity extends AppCompatActivity implements RadioGroup.OnChec
 
                     @Override
                     public void onError(Throwable e) {
-                        Toast.makeText(MainActivity.this, "获取缩略图失败 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity2.this, "获取缩略图失败 : " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     }
 
                 });

@@ -13,6 +13,13 @@ android {
         ndk {
             abiFilters 'armeabi-v7a'
         }
+
+        sourceSets {
+            main {
+                jniLibs.srcDirs = ['src/main/jniLibs']
+            }
+        }
+
     }
     buildTypes {
         release {
@@ -23,7 +30,7 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:' + rootProject.ext.android.supportVersion
     implementation 'com.android.support:recyclerview-v7:' + rootProject.ext.android.supportVersion
     implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
@@ -34,5 +41,8 @@ dependencies {
     implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
     implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
     implementation 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
-    compile project(':media-metadata-retriever-compat')
+    implementation project(':media-metadata-retriever-compat')
+
+    implementation 'com.facebook.fresco:webpsupport:1.13.0'
+    implementation 'com.facebook.fresco:animated-webp:1.13.0'
 }

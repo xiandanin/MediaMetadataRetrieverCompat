@@ -9,7 +9,6 @@ import android.graphics.Matrix;
  */
 public class BitmapRotateTransform {
 
-
     public static Bitmap transform(Bitmap bitmap, float rotate) {
         Matrix matrix = new Matrix();
         matrix.postRotate(rotate);

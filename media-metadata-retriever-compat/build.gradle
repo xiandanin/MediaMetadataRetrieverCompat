@@ -2,5 +2,7 @@ apply plugin: 'com.android.library'
 apply from: "bintray.gradle"
 
 dependencies {
-    compileOnly 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
+    compileOnly 'com.android.support:support-annotations:' + rootProject.ext.android.supportVersion
+    compileOnly 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
+    compileOnly 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
 }

@@ -36,10 +36,10 @@ import java.util.Iterator;
 import java.util.Map;
 
 /**
- * 图片的解析
+ * 图片引擎
  *
  * @author dengyuhan
- *         created 2018/10/15 19:36
+ * created 2018/10/15 19:36
  */
 public class ImageMediaMetadataRetrieverImpl implements IMediaMetadataRetriever {
 
@@ -203,10 +203,10 @@ public class ImageMediaMetadataRetrieverImpl implements IMediaMetadataRetriever 
                 return String.valueOf(getOptions().outWidth);
             } else if (METADATA_KEY_HEIGHT == keyCodeInt) {
                 return String.valueOf(getOptions().outHeight);
-            } else if (isImageType(ImageType.GIF, ImageType.WEBP) && METADATA_KEY_DURATION == keyCodeInt) {
-                //gif和webp才有时长
+            } else if (METADATA_KEY_DURATION == keyCodeInt && isImageType(ImageType.GIF, ImageType.WEBP_A, ImageType.PNG_A)) {
+                //gif/webp/apng才有时长
                 return String.valueOf(getMovie().duration());
-            } else if (isImageType(ImageType.JPEG) && METADATA_KEY_ROTATION == keyCodeInt) {
+            } else if (METADATA_KEY_ROTATION == keyCodeInt && isImageType(ImageType.JPEG)) {
                 //jpg才有Exif
                 return String.valueOf(getJPGRotate());
             }
