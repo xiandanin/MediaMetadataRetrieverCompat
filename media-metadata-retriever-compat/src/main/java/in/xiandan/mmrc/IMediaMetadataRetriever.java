@@ -23,10 +23,10 @@ public interface IMediaMetadataRetriever {
      * 获取指定时间帧
      *
      * @param timeUs 微秒
-     * @param option {@link MediaRetriever.Key#OPTION_PREVIOUS_SYNC} 早于timeUs的同步帧;
-     *               {@link MediaRetriever.Key#OPTION_NEXT_SYNC} 晚于timeUs的同步帧;
-     *               {@link MediaRetriever.Key#OPTION_CLOSEST_SYNC} 最接近timeUs的同步帧;
-     *               {@link MediaRetriever.Key#OPTION_CLOSEST} 最接近timeUs的帧，但可能不是同步帧(性能开销较大).
+     * @param option {@link MediaRetrieverResource.Key#OPTION_PREVIOUS_SYNC}
+     *               {@link MediaRetrieverResource.Key#OPTION_NEXT_SYNC}
+     *               {@link MediaRetrieverResource.Key#OPTION_CLOSEST_SYNC}
+     *               {@link MediaRetrieverResource.Key#OPTION_CLOSEST}
      * @return 时间帧
      */
     @Nullable

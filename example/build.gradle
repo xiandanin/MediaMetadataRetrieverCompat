@@ -4,7 +4,7 @@ android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
     buildToolsVersion rootProject.ext.android.buildToolsVersion
     defaultConfig {
-        applicationId "com.dyhdyh.compat.mmrc.example"
+        applicationId "in.xiandan.mmrc.example"
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
         versionCode rootProject.ext.android.targetSdkVersion
@@ -27,22 +27,22 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
 }
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     implementation 'com.android.support:appcompat-v7:' + rootProject.ext.android.supportVersion
     implementation 'com.android.support:recyclerview-v7:' + rootProject.ext.android.supportVersion
-    implementation 'io.reactivex.rxjava2:rxjava:2.1.0'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.0.1'
-    implementation 'com.dyhdyh.io:asset-file:1.0.1'
-    implementation 'com.dyhdyh.loadingbar:loadingbar:1.4.7'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+    implementation 'com.dyhdyh.io:asset-file:1.0.2'
 
-    implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
-    implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
     implementation 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
+    implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
     implementation project(':media-metadata-retriever-compat')
-
-    implementation 'com.facebook.fresco:webpsupport:1.13.0'
-    implementation 'com.facebook.fresco:animated-webp:1.13.0'
 }

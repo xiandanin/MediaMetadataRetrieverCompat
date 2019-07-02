@@ -1,8 +1,8 @@
 ext {
     android =
             [
-                    versionCode      : 10,
-                    versionName      : "1.0.9",
+                    versionCode      : 11,
+                    versionName      : "1.2.0",
 
                     compileSdkVersion: 28,
                     buildToolsVersion: "28.0.3",
@@ -18,7 +18,7 @@ ext {
             [
                     //项目名称
                     name       : "MediaMetadataRetrieverCompat",
-                    groupId    : "com.dyhdyh.compat.mmrc",
+                    groupId    : "in.xiandan.mmrc",
                     //项目地址
                     siteUrl    : "https://github.com/dengyuhan/MediaMetadataRetrieverCompat",
                     //项目git地址

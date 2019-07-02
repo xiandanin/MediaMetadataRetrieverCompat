@@ -1,107 +1,116 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="@dimen/activity_vertical_margin">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical">
+        android:orientation="vertical"
+        android:padding="@dimen/activity_vertical_margin">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="解析器类型：" />
-
-        <RadioGroup
-            android:id="@+id/rg"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:orientation="horizontal">
 
-            <RadioButton
-                android:id="@+id/rb_auto"
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:checked="true"
-                android:text="自动" />
+                android:layout_gravity="center_vertical"
+                android:text="指定检索器" />
 
-            <RadioButton
-                android:id="@+id/rb_ffmpeg"
+            <Spinner
+                android:id="@+id/spinner"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawSelectorOnTop="true"
+                android:textSize="20sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="FFmpeg" />
+                android:layout_gravity="center_vertical"
+                android:text="取帧方式" />
 
-            <RadioButton
-                android:id="@+id/rb_android"
-                android:layout_width="wrap_content"
+            <Spinner
+                android:id="@+id/spinner_frame"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="原生API" />
-        </RadioGroup>
-    </LinearLayout>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="图片测试" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_image"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="音频测试" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_audio"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="视频测试" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/rv_video"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-
-
-    <EditText
-        android:id="@+id/ed"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/hint_video_path" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:onClick="clickMediaMetadata"
-        android:text="获取媒体数据/缩略图" />
-
-    <RelativeLayout
-        android:id="@+id/layout_info"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+                android:layout_marginStart="14dp"
+                android:drawSelectorOnTop="true"
+                android:textSize="20sp" />
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5dp"
+            android:text="图片测试" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_image"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="音频测试" />
+
         <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv"
+            android:id="@+id/rv_audio"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_below="@id/tv" />
-    </RelativeLayout>
-</LinearLayout>
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="视频测试" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_video"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+
+        <EditText
+            android:id="@+id/ed"
+            android:textSize="14sp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_video_path" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="clickMediaMetadata"
+            android:text="获取媒体数据/缩略图" />
+
+        <RelativeLayout
+            android:id="@+id/layout_info"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <TextView
+                android:id="@+id/tv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/rv" />
+
+        </RelativeLayout>
+    </LinearLayout>
+</ScrollView>

@@ -9,8 +9,9 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.util.Iterator;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * @author dengyuhan
@@ -20,10 +21,15 @@ public class HTTPSource implements DataSource<String> {
     private String mUrl;
     private Map<String, String> mHeaders;
 
+    public HTTPSource(@NonNull String url) {
+        this(url, null);
+    }
+
     public HTTPSource(@NonNull String url, @Nullable Map<String, String> headers) {
         this.mUrl = url;
         this.mHeaders = headers;
     }
+
 
     @NonNull
     @Override
@@ -31,8 +37,9 @@ public class HTTPSource implements DataSource<String> {
         return mUrl;
     }
 
+    @NonNull
     public Map<String, String> getHeaders() {
-        return mHeaders;
+        return mHeaders == null ? new HashMap<>() : mHeaders;
     }
 
     @NonNull
@@ -44,10 +51,11 @@ public class HTTPSource implements DataSource<String> {
         final URL url = new URL(mUrl);
         final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
-        Iterator<Map.Entry<String, String>> entries = mHeaders.entrySet().iterator();
-        while (entries.hasNext()) {
-            Map.Entry<String, String> entry = entries.next();
-            connection.addRequestProperty(entry.getKey(), entry.getValue());
+        if (mHeaders != null) {
+            final Set<Map.Entry<String, String>> entries = mHeaders.entrySet();
+            for (Map.Entry<String, String> entry : entries) {
+                connection.addRequestProperty(entry.getKey(), entry.getValue());
+            }
         }
         connection.connect();
         return connection.getInputStream();

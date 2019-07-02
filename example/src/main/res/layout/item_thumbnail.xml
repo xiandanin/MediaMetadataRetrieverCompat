@@ -4,9 +4,16 @@
     android:layout_height="wrap_content">
 
     <ImageView
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         android:id="@+id/iv_thumbnail"
-        android:background="@color/colorPrimary"
         android:layout_width="@dimen/thumbnail_size"
         android:layout_height="@dimen/thumbnail_size" />
+
+    <TextView
+        android:id="@+id/tv_time"
+        android:layout_marginTop="2dp"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/iv_thumbnail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 </RelativeLayout>
