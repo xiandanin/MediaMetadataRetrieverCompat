@@ -22,28 +22,31 @@ public interface IMediaMetadataRetriever {
     /**
      * 获取指定时间帧
      *
-     * @param timeUs 微秒
-     * @param option {@link MediaRetrieverResource.Key#OPTION_PREVIOUS_SYNC}
-     *               {@link MediaRetrieverResource.Key#OPTION_NEXT_SYNC}
-     *               {@link MediaRetrieverResource.Key#OPTION_CLOSEST_SYNC}
-     *               {@link MediaRetrieverResource.Key#OPTION_CLOSEST}
+     * @param millis 毫秒
+     * @param option {@link MediaMetadataKey#OPTION_PREVIOUS_SYNC}
+     *               {@link MediaMetadataKey#OPTION_NEXT_SYNC}
+     *               {@link MediaMetadataKey#OPTION_CLOSEST_SYNC}
+     *               {@link MediaMetadataKey#OPTION_CLOSEST}
      * @return 时间帧
      */
     @Nullable
-    Bitmap getFrameAtTime(long timeUs, int option);
+    Bitmap getFrameAtTime(long millis, int option);
 
 
     /**
      * 获取指定时间帧并缩放裁剪
      *
-     * @param timeUs    微秒
-     * @param option
+     * @param millis    毫秒
+     * @param option    {@link MediaMetadataKey#OPTION_PREVIOUS_SYNC}
+     *                  {@link MediaMetadataKey#OPTION_NEXT_SYNC}
+     *                  {@link MediaMetadataKey#OPTION_CLOSEST_SYNC}
+     *                  {@link MediaMetadataKey#OPTION_CLOSEST}
      * @param dstWidth  输出宽度
      * @param dstHeight 输出高度
      * @return
      */
     @Nullable
-    Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight);
+    Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight);
 
     @Nullable
     byte[] getEmbeddedPicture();

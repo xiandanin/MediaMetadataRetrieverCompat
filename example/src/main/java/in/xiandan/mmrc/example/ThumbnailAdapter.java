@@ -1,5 +1,6 @@
 package in.xiandan.mmrc.example;
 
+import android.graphics.Bitmap;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,12 +32,14 @@ public class ThumbnailAdapter extends RecyclerView.Adapter<ThumbnailAdapter.Hold
     public void onBindViewHolder(Holder holder, int position) {
         ThumbnailBitmap item = mThumbnails[position];
         if (item != null) {
-            if (item.getBitmap() == null) {
+            final Bitmap bitmap = item.getBitmap();
+            if (bitmap == null) {
                 holder.iv_thumbnail.setImageResource(R.color.colorPlaceholder);
+                holder.tv_time.setText(String.valueOf(position));
             } else {
-                holder.iv_thumbnail.setImageBitmap(item.getBitmap());
+                holder.iv_thumbnail.setImageBitmap(bitmap);
+                holder.tv_time.setText(String.format("%d - %dx%d", position, bitmap.getWidth(), bitmap.getHeight()));
             }
-            holder.tv_time.setText(String.format("%d - %s", position, mFormat.format(item.getMillis())));
         } else {
             holder.iv_thumbnail.setImageBitmap(null);
             holder.tv_time.setText("");

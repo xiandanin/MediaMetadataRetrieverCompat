@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
+ * FileDescriptor数据源
  * @author dengyuhan
  * created 2019-06-28 17:08
  */

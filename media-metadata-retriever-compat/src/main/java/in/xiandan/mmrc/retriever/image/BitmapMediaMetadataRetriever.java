@@ -3,17 +3,18 @@ package in.xiandan.mmrc.retriever.image;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
 import in.xiandan.mmrc.IMediaMetadataRetriever;
-import in.xiandan.mmrc.MediaRetrieverResource;
+import in.xiandan.mmrc.MediaMetadataKey;
 import in.xiandan.mmrc.datasource.DataSource;
 import in.xiandan.mmrc.utils.BitmapProcessor;
 import in.xiandan.mmrc.utils.Closeables;
+import in.xiandan.mmrc.utils.MetadataRetrieverUtils;
 
 /**
  * @author dengyuhan
@@ -29,45 +30,37 @@ public class BitmapMediaMetadataRetriever implements IMediaMetadataRetriever {
         mStream.mark(Integer.MAX_VALUE);
     }
 
+    @Nullable
     @Override
     public Bitmap getFrameAtTime() {
-        return getFrameAtTime(0, MediaRetrieverResource.Key.OPTION_CLOSEST_SYNC);
+        return this.getFrameAtTime(0, MediaMetadataKey.OPTION_CLOSEST_SYNC);
     }
 
+    @Nullable
     @Override
-    public Bitmap getFrameAtTime(long timeUs, int option) {
-        return BitmapFactory.decodeStream(getStream(true), null, createOptions());
+    public Bitmap getFrameAtTime(long millis, int option) {
+        return BitmapFactory.decodeStream(getStream(true));
     }
 
+    @Nullable
     @Override
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
-        final BitmapFactory.Options sampling = createOptions();
+    public Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        final BitmapFactory.Options sampling = new BitmapFactory.Options();
         sampling.inSampleSize = BitmapProcessor.calculateSampleSize(getWidth(), getHeight(), dstWidth, dstHeight);
         return BitmapFactory.decodeStream(getStream(true), null, sampling);
+
     }
 
     @Override
     public byte[] getEmbeddedPicture() {
-        try {
-            final InputStream stream = getStream(true);
-            ByteArrayOutputStream swapStream = new ByteArrayOutputStream();
-            byte[] buff = new byte[1024];
-            int buffer;
-            while ((buffer = stream.read(buff)) > 0) {
-                swapStream.write(buff, 0, buffer);
-            }
-            return swapStream.toByteArray();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return MetadataRetrieverUtils.getEmbeddedPicture(getStream(true));
     }
 
     @Override
     public String extractMetadata(String keyCode) {
-        if (MediaRetrieverResource.Key.METADATA_KEY_WIDTH.equals(keyCode)) {
+        if (MediaMetadataKey.WIDTH.equals(keyCode)) {
             return String.valueOf(getWidth());
-        } else if (MediaRetrieverResource.Key.METADATA_KEY_HEIGHT.equals(keyCode)) {
+        } else if (MediaMetadataKey.HEIGHT.equals(keyCode)) {
             return String.valueOf(getHeight());
         }
         return null;
@@ -110,22 +103,11 @@ public class BitmapMediaMetadataRetriever implements IMediaMetadataRetriever {
      */
     protected BitmapFactory.Options obtainDecodeOptions() {
         if (mOptions == null) {
-            mOptions = createOptions();
+            mOptions = new BitmapFactory.Options();
             mOptions.inJustDecodeBounds = true;
             BitmapFactory.decodeStream(getStream(true), null, mOptions);
         }
         return mOptions;
     }
 
-
-    /**
-     * 根据配置创建Options
-     *
-     * @return
-     */
-    protected BitmapFactory.Options createOptions() {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inPreferredConfig = MediaRetrieverResource.Config.get().getBitmapConfig();
-        return options;
-    }
 }

@@ -8,21 +8,11 @@ import android.graphics.Bitmap;
  */
 public class ThumbnailBitmap {
     private int index;
-    private long millis;
     private Bitmap bitmap;
 
-    public ThumbnailBitmap(int index, long millis, Bitmap bitmap) {
+    public ThumbnailBitmap(int index, Bitmap bitmap) {
         this.index = index;
-        this.millis = millis;
         this.bitmap = bitmap;
-    }
-
-    public long getMillis() {
-        return millis;
-    }
-
-    public void setMillis(long millis) {
-        this.millis = millis;
     }
 
     public int getIndex() {

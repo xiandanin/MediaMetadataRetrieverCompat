@@ -21,40 +21,58 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="指定检索器" />
+                android:text="检索器类型"
+                android:textSize="@dimen/text_size_label" />
 
             <Spinner
                 android:id="@+id/spinner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:drawSelectorOnTop="true"
-                android:textSize="20sp" />
+                android:drawSelectorOnTop="true" />
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:text="取帧方式" />
+                android:text="取帧方式"
+                android:textSize="@dimen/text_size_label" />
 
             <Spinner
+                android:layout_weight="1"
                 android:id="@+id/spinner_frame"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="13dp"
+                android:drawSelectorOnTop="true" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="尺寸"
+                android:textSize="@dimen/text_size_label" />
+
+            <Spinner
+                android:layout_weight="1"
+                android:id="@+id/spinner_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginStart="14dp"
-                android:drawSelectorOnTop="true"
-                android:textSize="20sp" />
+                android:drawSelectorOnTop="true" />
         </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:text="图片测试" />
+            android:text="图片测试"
+            android:textSize="@dimen/text_size_label" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_image"
@@ -64,7 +82,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="音频测试" />
+            android:text="音频测试"
+            android:textSize="@dimen/text_size_label" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_audio"
@@ -74,20 +93,32 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="视频测试" />
+            android:text="视频测试"
+            android:textSize="@dimen/text_size_label" />
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/rv_video"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自定义"
+            android:textSize="@dimen/text_size_label" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/rv_custom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
 
         <EditText
             android:id="@+id/ed"
-            android:textSize="14sp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_video_path" />
+            android:hint="@string/hint_video_path"
+            android:textSize="14sp" />
 
         <Button
             android:layout_width="match_parent"
@@ -109,7 +140,8 @@
                 android:id="@+id/tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/rv" />
+                android:layout_below="@id/rv"
+                android:textColor="@color/colorText" />
 
         </RelativeLayout>
     </LinearLayout>

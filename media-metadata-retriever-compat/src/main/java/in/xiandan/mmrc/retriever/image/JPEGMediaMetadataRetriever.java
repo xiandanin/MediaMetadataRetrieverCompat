@@ -2,14 +2,15 @@ package in.xiandan.mmrc.retriever.image;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.media.ExifInterface;
 
 import java.io.IOException;
 
-import in.xiandan.mmrc.MediaRetrieverResource;
+import in.xiandan.mmrc.MediaMetadataKey;
 import in.xiandan.mmrc.datasource.DataSource;
 import in.xiandan.mmrc.utils.BitmapProcessor;
-import in.xiandan.mmrc.utils.MetadataValueFormat;
+import in.xiandan.mmrc.utils.MetadataRetrieverUtils;
 
 /**
  * 支持Exif的Retriever
@@ -31,26 +32,36 @@ public class JPEGMediaMetadataRetriever extends BitmapMediaMetadataRetriever {
         final String value = super.extractMetadata(keyCode);
         if (value != null) {
             return value;
-        } else if (MediaRetrieverResource.Key.METADATA_KEY_ROTATION.equals(keyCode)) {
+        } else if (MediaMetadataKey.ROTATION.equals(keyCode)) {
             return String.valueOf(mExif.getRotationDegrees());
-        } else if (MediaRetrieverResource.Key.METADATA_KEY_LOCATION.equals(keyCode)) {
-            return MetadataValueFormat.formatLatLong(mExif.getLatLong());
-        } else if (MediaRetrieverResource.Key.METADATA_KEY_DATE.equals(keyCode)) {
+        } else if (MediaMetadataKey.LOCATION.equals(keyCode)) {
+            return MetadataRetrieverUtils.formatLatLong(mExif.getLatLong());
+        } else if (MediaMetadataKey.DATE.equals(keyCode)) {
             return String.valueOf(mExif.getDateTime());
         } else {
             return mExif.getAttribute(keyCode);
         }
     }
 
+
+    @Nullable
     @Override
-    public Bitmap getFrameAtTime(long timeUs, int option) {
-        final Bitmap source = super.getFrameAtTime(timeUs, option);
+    public Bitmap getFrameAtTime() {
+        final Bitmap source = super.getFrameAtTime();
         return source != null ? BitmapProcessor.rotate(source, mExif.getRotationDegrees()) : null;
     }
 
+    @Nullable
     @Override
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
-        final Bitmap source = super.getScaledFrameAtTime(timeUs, option, dstWidth, dstHeight);
+    public Bitmap getFrameAtTime(long millis, int option) {
+        final Bitmap source = super.getFrameAtTime(millis, option);
+        return source != null ? BitmapProcessor.rotate(source, mExif.getRotationDegrees()) : null;
+    }
+
+    @Nullable
+    @Override
+    public Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        final Bitmap source = super.getScaledFrameAtTime(millis, option, dstWidth, dstHeight);
         return source != null ? BitmapProcessor.rotate(source, mExif.getRotationDegrees()) : null;
     }
 

@@ -4,19 +4,22 @@ import android.graphics.Bitmap;
 import android.media.MediaMetadataRetriever;
 import android.os.Build;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.io.IOException;
 
 import in.xiandan.mmrc.IMediaMetadataRetriever;
-import in.xiandan.mmrc.MediaRetrieverResource;
+import in.xiandan.mmrc.MediaMetadataConfig;
+import in.xiandan.mmrc.MediaMetadataKey;
+import in.xiandan.mmrc.MediaMetadataResource;
 import in.xiandan.mmrc.datasource.DataSource;
 import in.xiandan.mmrc.datasource.FileDescriptorSource;
 import in.xiandan.mmrc.datasource.FileSource;
 import in.xiandan.mmrc.datasource.HTTPSource;
 import in.xiandan.mmrc.datasource.UriSource;
 import in.xiandan.mmrc.utils.BitmapProcessor;
-import in.xiandan.mmrc.utils.MetadataValueFormat;
+import in.xiandan.mmrc.utils.MetadataRetrieverUtils;
 
 /**
  * 原生的Retriever
@@ -54,23 +57,29 @@ public class AndroidMediaMetadataRetriever implements IMediaMetadataRetriever {
             final UriSource uriSource = ((UriSource) source);
             this.mRetriever.setDataSource(uriSource.getContext(), uriSource.source());
         } else {
-            MediaRetrieverResource.Config.get().setCustomDataSource(this);
+            final MediaMetadataConfig.CustomDataSourceCallback callback = MediaMetadataResource.globalConfig().getSourceCallback();
+            if (callback != null) {
+                callback.setCustomDataSource(this, source);
+            }
         }
     }
 
-
+    @Nullable
     @Override
     public Bitmap getFrameAtTime() {
         return this.mRetriever.getFrameAtTime();
     }
 
+    @Nullable
     @Override
-    public Bitmap getFrameAtTime(long timeUs, int option) {
-        return this.mRetriever.getFrameAtTime(timeUs, option);
+    public Bitmap getFrameAtTime(long millis, int option) {
+        return this.mRetriever.getFrameAtTime(millis * 1000, option);
     }
 
+    @Nullable
     @Override
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
+    public Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        long timeUs = millis * 1000;
         final int srcWidth = getWidth();
         final int srcHeight = getHeight();
         if (srcWidth > 0 && srcHeight > 0) {
@@ -78,10 +87,10 @@ public class AndroidMediaMetadataRetriever implements IMediaMetadataRetriever {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
                 return this.mRetriever.getScaledFrameAtTime(timeUs, option, (int) (mWidth * scale), (int) (mHeight * scale));
             } else {
-                return BitmapProcessor.scale(this.getFrameAtTime(timeUs, option), scale);
+                return BitmapProcessor.floorScale(this.mRetriever.getFrameAtTime(timeUs, option), scale);
             }
         }
-        return this.getFrameAtTime(timeUs, option);
+        return this.mRetriever.getFrameAtTime(timeUs, option);
     }
 
     @Override
@@ -92,13 +101,11 @@ public class AndroidMediaMetadataRetriever implements IMediaMetadataRetriever {
 
     @Override
     public String extractMetadata(String keyCode) {
-        final MediaRetrieverResource.KeyCompat keyCompat = MediaRetrieverResource.getKey(keyCode);
-        String value = keyCompat == null || keyCompat.android == MediaRetrieverResource.KeyCompat.NULL_KEY ? null : this.mRetriever.extractMetadata(keyCompat.android);
+        final MediaMetadataResource.KeyCompat key = MediaMetadataResource.getKey(keyCode);
+        String value = key == null || key.android == null ? null : this.mRetriever.extractMetadata(key.android);
         //统一格式
-        if (!TextUtils.isEmpty(value)) {
-            if (MediaRetrieverResource.Key.METADATA_KEY_DATE.equals(keyCode)) {
-                return MetadataValueFormat.parseTimeString("yyyyMMdd'T'HHmmss.SSS'Z'", value);
-            }
+        if (MediaMetadataKey.DATE.equals(keyCode) && !TextUtils.isEmpty(value)) {
+            return MetadataRetrieverUtils.parseTimeString("yyyyMMdd'T'HHmmss.SSS'Z'", value);
         }
         return value;
     }

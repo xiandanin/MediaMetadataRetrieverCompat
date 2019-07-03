@@ -21,7 +21,7 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
     /**
      * Maximum header size for any image type.
      *
-     * <p>This determines how much data {@link ImageFormatChecker#getImageFormat(InputStream) reads
+     * <p>This determines how much data {@link FileFormatChecker#getFileFormat(InputStream) reads
      * from a stream. After changing any of the type detection algorithms, or adding a new one, this
      * value should be edited.
      */
@@ -147,7 +147,7 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
      */
     private static boolean isJpegHeader(final byte[] imageHeaderBytes, final int headerSize) {
         return headerSize >= JPEG_HEADER.length &&
-                ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, JPEG_HEADER);
+                FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, JPEG_HEADER);
     }
 
     /**
@@ -172,10 +172,10 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
      */
     private static boolean isPngHeader(final byte[] imageHeaderBytes, final int headerSize) {
         return headerSize >= PNG_HEADER.length &&
-                ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, PNG_HEADER);
+                FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, PNG_HEADER);
     }
 
-    private static final byte[] APNG_BYTES = ImageFormatCheckerUtils.asciiBytes("acTL");
+    private static final byte[] APNG_BYTES = FileFormatCheckerUtils.asciiBytes("acTL");
     private static final int APNG_HEADER_LENGTH = 37 + APNG_BYTES.length;
 
     private static FileFormat getPNGFormat(final byte[] imageHeaderBytes, final int headerSize) {
@@ -209,8 +209,8 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
      * Every gif image starts with "GIF" bytes followed by
      * bytes indicating version of gif standard
      */
-    private static final byte[] GIF_HEADER_87A = ImageFormatCheckerUtils.asciiBytes("GIF87a");
-    private static final byte[] GIF_HEADER_89A = ImageFormatCheckerUtils.asciiBytes("GIF89a");
+    private static final byte[] GIF_HEADER_87A = FileFormatCheckerUtils.asciiBytes("GIF87a");
+    private static final byte[] GIF_HEADER_89A = FileFormatCheckerUtils.asciiBytes("GIF89a");
     private static final int GIF_HEADER_LENGTH = 6;
 
     /**
@@ -226,14 +226,14 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
         if (headerSize < GIF_HEADER_LENGTH) {
             return false;
         }
-        return ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, GIF_HEADER_87A) ||
-                ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, GIF_HEADER_89A);
+        return FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, GIF_HEADER_87A) ||
+                FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, GIF_HEADER_89A);
     }
 
     /**
      * Every bmp image starts with "BM" bytes
      */
-    private static final byte[] BMP_HEADER = ImageFormatCheckerUtils.asciiBytes("BM");
+    private static final byte[] BMP_HEADER = FileFormatCheckerUtils.asciiBytes("BM");
     private static final int BMP_HEADER_LENGTH = BMP_HEADER.length;
 
     /**
@@ -249,7 +249,7 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
         if (headerSize < BMP_HEADER.length) {
             return false;
         }
-        return ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, BMP_HEADER);
+        return FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, BMP_HEADER);
     }
 
     /**
@@ -273,7 +273,7 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
         if (headerSize < ICO_HEADER.length) {
             return false;
         }
-        return ImageFormatCheckerUtils.startsWithPattern(imageHeaderBytes, ICO_HEADER);
+        return FileFormatCheckerUtils.startsWithPattern(imageHeaderBytes, ICO_HEADER);
     }
 
     /**
@@ -287,7 +287,7 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
             "heic", "heix", "hevc", "hevx", "mif1", "msf1"
     };
     private static final int HEIF_HEADER_LENGTH =
-            ImageFormatCheckerUtils.asciiBytes(HEIF_HEADER_PREFIX + HEIF_HEADER_SUFFIXES[0]).length;
+            FileFormatCheckerUtils.asciiBytes(HEIF_HEADER_PREFIX + HEIF_HEADER_SUFFIXES[0]).length;
 
     /**
      * Checks if first headerSize bytes of imageHeaderBytes constitute a valid header for a HEIF
@@ -310,10 +310,10 @@ public class DefaultImageFormatChecker implements FileFormat.FormatChecker {
 
         for (final String heifFtype : HEIF_HEADER_SUFFIXES) {
             final int indexOfHeaderPattern =
-                    ImageFormatCheckerUtils.indexOfPattern(
+                    FileFormatCheckerUtils.indexOfPattern(
                             imageHeaderBytes,
                             imageHeaderBytes.length,
-                            ImageFormatCheckerUtils.asciiBytes(HEIF_HEADER_PREFIX + heifFtype),
+                            FileFormatCheckerUtils.asciiBytes(HEIF_HEADER_PREFIX + heifFtype),
                             HEIF_HEADER_LENGTH);
             if (indexOfHeaderPattern > -1) {
                 return true;

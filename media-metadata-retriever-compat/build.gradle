@@ -5,4 +5,5 @@ dependencies {
     compileOnly 'com.android.support:support-annotations:' + rootProject.ext.android.supportVersion
     compileOnly 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
     compileOnly 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+    compileOnly 'com.squareup.okhttp3:okhttp:4.0.0'
 }

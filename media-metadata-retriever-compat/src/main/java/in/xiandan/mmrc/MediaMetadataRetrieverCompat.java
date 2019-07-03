@@ -10,8 +10,7 @@ import java.util.List;
 
 import in.xiandan.mmrc.datasource.DataSource;
 import in.xiandan.mmrc.fileformat.FileFormat;
-import in.xiandan.mmrc.fileformat.ImageFormatChecker;
-import in.xiandan.mmrc.fileformat.UnknownFileFormatException;
+import in.xiandan.mmrc.fileformat.FileFormatChecker;
 import in.xiandan.mmrc.retriever.NullMediaMetadataRetriever;
 import in.xiandan.mmrc.utils.BitmapProcessor;
 import in.xiandan.mmrc.utils.Closeables;
@@ -23,6 +22,11 @@ import in.xiandan.mmrc.utils.Closeables;
 public final class MediaMetadataRetrieverCompat {
     private IMediaMetadataRetriever mImpl;
 
+    /**
+     * 设置数据源
+     *
+     * @param source
+     */
     public void setDataSource(@NonNull DataSource source) {
         try {
             this.setDataSourceOrThrow(source);
@@ -32,29 +36,24 @@ public final class MediaMetadataRetrieverCompat {
     }
 
     /**
-     * 自动根据文件 创建MediaMetadataRetrieverCompat
+     * 设置数据源或抛出异常
      *
      * @param source 数据源
-     * @return
      * @throws IOException
-     * @throws UnknownFileFormatException
      */
     public void setDataSourceOrThrow(@NonNull DataSource source) throws IOException {
         this.setDataSourceOrThrow(source, null);
     }
 
-
     /**
-     * 创建MediaMetadataRetrieverCompat
+     * 设置数据源或抛出异常 并指定检索器
      *
-     * @param source 数据源
-     * @param cls    指定的检索器，null则自动选择
-     * @return
+     * @param source
+     * @param cls
      * @throws IOException
-     * @throws UnknownFileFormatException
      */
     public void setDataSourceOrThrow(@NonNull DataSource source, @Nullable Class<? extends MediaMetadataRetrieverFactory> cls) throws IOException {
-        final List<MediaMetadataRetrieverFactory> factories = MediaRetrieverResource.Config.get().getFactories();
+        final List<MediaMetadataRetrieverFactory> factories = MediaMetadataResource.globalConfig().getFactories();
         MediaMetadataRetrieverFactory applyFactory = null;
         if (cls != null) {
             //如果指定了先检查是否有此类型的检索器
@@ -67,9 +66,9 @@ public final class MediaMetadataRetrieverCompat {
         }
         //没有指定或没有找到指定的就自动根据格式创建检索器
         if (applyFactory == null) {
-            //不指定检索器 自动根据格式创建检索器
+            //不指定检索器 就根据文件创建检索器
             final InputStream stream = source.toStream();
-            final FileFormat fileFormat = ImageFormatChecker.getImageFormat(stream);
+            final FileFormat fileFormat = FileFormatChecker.getFileFormat(stream);
             Closeables.closeQuietly(stream);
             for (MediaMetadataRetrieverFactory factory : factories) {
                 if (factory.supportsFileFormat(fileFormat)) {
@@ -82,7 +81,6 @@ public final class MediaMetadataRetrieverCompat {
         //如果没有支持的Factory
         if (applyFactory == null) {
             this.mImpl = new NullMediaMetadataRetriever();
-            throw new UnknownFileFormatException("there are no retriever available for this file.");
         } else {
             //如果有合适的Factory 就直接创建
             this.mImpl = applyFactory.create();
@@ -94,16 +92,34 @@ public final class MediaMetadataRetrieverCompat {
         return mImpl.getFrameAtTime();
     }
 
-    public Bitmap getFrameAtTime(long timeUs, int option) {
-        return mImpl.getFrameAtTime(timeUs, option);
+    public Bitmap getFrameAtTime(long millis, int option) {
+        return mImpl.getFrameAtTime(millis, option);
     }
 
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
-        return mImpl.getScaledFrameAtTime(timeUs, option, dstWidth, dstHeight);
+    /**
+     * 获取指定毫秒的缩略图，并基于指定宽高缩放，输出的Bitmap不一定是指定宽高
+     *
+     * @param millis
+     * @param option
+     * @param dstWidth
+     * @param dstHeight
+     * @return
+     */
+    public Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        return mImpl.getScaledFrameAtTime(millis, option, dstWidth, dstHeight);
     }
 
-    public Bitmap getCenterCropFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
-        return BitmapProcessor.centerCrop(this.getScaledFrameAtTime(timeUs, option, dstWidth, dstHeight), MediaRetrieverResource.Config.get().getBitmapConfig(), dstWidth, dstHeight);
+    /**
+     * 获取指定毫秒的缩略图，并按指定宽高缩放裁剪，输出的Bitmap一定是指定宽高
+     *
+     * @param millis
+     * @param option
+     * @param dstWidth
+     * @param dstHeight
+     * @return
+     */
+    public Bitmap getCenterCropFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        return BitmapProcessor.centerCrop(this.getScaledFrameAtTime(millis, option, dstWidth, dstHeight), dstWidth, dstHeight);
     }
 
     public byte[] getEmbeddedPicture() {

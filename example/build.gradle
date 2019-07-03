@@ -14,12 +14,6 @@ android {
             abiFilters 'armeabi-v7a'
         }
 
-        sourceSets {
-            main {
-                jniLibs.srcDirs = ['src/main/jniLibs']
-            }
-        }
-
     }
     buildTypes {
         release {
@@ -44,5 +38,6 @@ dependencies {
 
     implementation 'com.android.support:exifinterface:' + rootProject.ext.android.supportVersion
     implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+    implementation 'com.caverock:androidsvg:1.2.1'
     implementation project(':media-metadata-retriever-compat')
 }

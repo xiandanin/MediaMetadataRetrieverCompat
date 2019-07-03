@@ -14,16 +14,13 @@ import java.util.Map;
 import java.util.Set;
 
 /**
+ * http数据源
  * @author dengyuhan
  * created 2019-06-28 16:45
  */
 public class HTTPSource implements DataSource<String> {
     private String mUrl;
     private Map<String, String> mHeaders;
-
-    public HTTPSource(@NonNull String url) {
-        this(url, null);
-    }
 
     public HTTPSource(@NonNull String url, @Nullable Map<String, String> headers) {
         this.mUrl = url;

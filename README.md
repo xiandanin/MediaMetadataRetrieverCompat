@@ -1,95 +1,133 @@
 # MediaMetadataRetrieverCompat
-多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频缩略图  
+多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频图片缩略图  
 
-## __简介__
-MediaMetadataRetrieverCompat 内部有两种实现(根据自身需求选择初始化方式)  
+## 效果
+　　　　　图片　　　　　　　　　音频　　　　　　　　　　视频　　　　　　　　　自定义
 
-`FFmpegMediaMetadataRetriever`  
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)，对视频资源有增强，但库体积较大  
+<img src="screenshot/1.gif" width="160"/>
+<img src="screenshot/2.gif" width="160"/>
+<img src="screenshot/3.gif" width="160"/>
+<img src="screenshot/4.gif" width="160"/>
 
-`MediaMetadataRetriever`   
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;基于原生API
+示例APK：[example-debug.apk](https://github.com/dengyuhan/MediaMetadataRetrieverCompat/releases/download/1.2.0/example-debug.apk)
 
-
-## __示例apk__
-![](screenshot/example-download_1.0.8.png)
-
-## __效果演示__
-![](screenshot/screenshot.gif)
-
-## __快速开始__
+## Gradle
 ```
-//核心库 必选
-implementation 'com.dyhdyh.compat.mmrc:media-metadata-retriever-compat:1.0.9'
+//必选
+implementation 'in.xiandan.mmrc:media-metadata-retriever-compat:1.2.0'
 
-//当需要FFmpegMediaMetadataRetriever时必选
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-java:1.0.14'
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi-v7a:1.0.14'
-
-//可选平台
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-armeabi:1.0.14'
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-arm64-v8a:1.0.14'
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-mips:1.0.14'
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-x86:1.0.14'
-implementation 'com.dyhdyh.remake:FFmpegMediaMetadataRetriever-x86_64:1.0.14'
+//可选，需要Exif支持时必选
+implementation 'com.android.support:exifinterface:28.0.0'
+//可选，需要FFmpeg支持时必选，全平台约24M
+implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+//只保留v7a，可降低至3M
+ndk {
+    abiFilters 'armeabi-v7a'
+}
 ```
 
-## __初始化（三种模式）__
-```
-//自动 - 推荐  
-MediaMetadataRetrieverCompat mmrc = MediaMetadataRetrieverCompat.create();  
-//FFmpeg  
-//MediaMetadataRetrieverCompat  mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_FFMPEG);  
-//原生API  
-//MediaMetadataRetrieverCompat  mmrc = MediaMetadataRetrieverCompat.create(MediaMetadataRetrieverCompat.RETRIEVER_ANDROID);
-```
-## __设置输入源__
-```
-//本地文件
-mmrc.setDataSource(inputFile);
+## 数据源类型
+[datasource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource) 中预设了一些`DataSource`，以提供不同的输入源，如果需要**自定义数据源**，可`implements DataSource`或参考其它数据源
 
-//网络资源(需要放在子线程，每次调用都会下载视频，请慎用，建议自行下载后设置File)
-mmrc.setDataSource(url, headers);
+* [FileSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/FileSource.java)
+* [HTTPSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/HTTPSource.java)
+* [UriSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/UriSource.java)
+* [FileDescriptorSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/FileDescriptorSource.java)
+* [OkHttpSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/OkHttpSource.java)（图片会使用OkHttp）
+* [InputStreamSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/InputStreamSource.java)（仅支持图片）
+* [AssetSource](media-metadata-retriever-compat/src/main/java/in/xiandan/mmrc/datasource/AssetSource.java)（仅支持图片）
 
-//Uri
-mmrc.setDataSource(context, uri);
+
+
+## 设置数据源
+设置数据源的操作建议放在子线程
+
+```
+MediaMetadataRetrieverCompat mmrc = new MediaMetadataRetrieverCompat();
+
+//设置数据源
+mmrc.setDataSource(source);
+//设置数据源或抛出异常
+mmrc.setDataSourceOrThrow(source);
+//设置数据源或抛出异常 并指定检索器
+mmrc.setDataSourceOrThrow(source, AndroidMediaMetadataRetrieverFactory.class);
 ```
 
-## __获取Metadata信息__
+## 获取Metadata信息
 ```
-String width = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_WIDTH);
-String height = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_HEIGHT);
-String rotation = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_VIDEO_ROTATION);
-String numTracks = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_NUM_TRACKS);
-String title = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_TITLE);
-String album = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_ALBUM);
-String albumArtist = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_ALBUMARTIST);
-String author = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_AUTHOR);
-String duration = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_DURATION);
-String framerate = mmrc.extractMetadata(MediaMetadataRetrieverCompat.METADATA_KEY_CAPTURE_FRAMERATE);
+final String width = mmrc.extractMetadata(MediaMetadataKey.WIDTH);
+
+//将值转换为int
+final int width = mmrc.extractMetadataInt(MediaMetadataKey.WIDTH, 0);
+
+//将值转换为float
+final float width = mmrc.extractMetadataFloat(MediaMetadataKey.WIDTH, 0f);
+
+//将值转换为long
+final long width = mmrc.extractMetadataLong(MediaMetadataKey.WIDTH, 0L);
+
 ...
-
-//带转换类型和默认值的 基本类型的默认值是-1
-long value = extractMetadataLong(keyCode);
-Long value = extractMetadataLong(keyCode, defaultValue);
-
-int value = extractMetadataInt(keyCode);
-Integer value = extractMetadataInteger(keyCode, defaultValue);
-
-float value = extractMetadataFloat(keyCode);
-Float value = extractMetadataFloat(keyCode, defaultValue);
 ```
 
-## __获取缩略图__
-耗时操作，请放在子线程，获取到的缩略图会根据资源信息自动旋转  
+## 获取缩略图
+取帧是耗时操作，需要放在子线程，视频有4种取帧方式 
+
+```
+//最接近timeUs的关键帧 - 仅视频
+MediaMetadataKey.OPTION_CLOSEST_SYNC
+//最接近timeUs的帧，不一定是关键帧(性能开销较大) - 仅视频
+MediaMetadataKey.OPTION_CLOSEST
+//早于timeUs的关键帧 - 仅视频
+MediaMetadataKey.OPTION_PREVIOUS_SYNC
+//晚于timeUs的关键帧 - 仅视频
+MediaMetadataKey.OPTION_NEXT_SYNC
+```
 
 ```
 //获取第一帧原尺寸图片
 mmrc.getFrameAtTime();
 
-//获取指定位置的原尺寸图片 注意这里传的timeUs是微秒
-mmrc.getFrameAtTime(timeUs, option);
+//获取指定毫秒的原尺寸图片 注意这里传的毫秒不再是微秒
+mmrc.getFrameAtTime(0, MediaMetadataKey.OPTION_CLOSEST_SYNC);
 
-//获取指定位置指定宽高的缩略图
-mmrc.getScaledFrameAtTime(timeUs, MediaMetadataRetrieverCompat.OPTION_CLOSEST, width, height);
+//获取指定毫秒的缩略图，并基于指定宽高缩放，输出的Bitmap不一定是指定宽高
+mmrc.getScaledFrameAtTime(0, MediaMetadataKey.OPTION_CLOSEST_SYNC, 300, 300);
+
+//获取指定毫秒的缩略图，并按指定宽高缩放裁剪，输出的Bitmap一定是指定宽高
+mmrc.getCenterCropFrameAtTime(0, MediaMetadataKey.OPTION_CLOSEST_SYNC, 300, 300);
 ```
+
+## 全局配置
+```
+//创建一个新的配置构造器
+MediaMetadataConfig.newBuilder()
+        .setCustomDataSourceCallback(new MediaMetadataConfig.CustomDataSourceCallback() {
+            @Override
+            public void setCustomDataSource(IMediaMetadataRetriever retriever, DataSource source) {
+                //当设置了自定义数据源时 会回调
+            }
+        })
+        //添加格式检查器
+        .addFileFormatChecker(new CustomFormatChecker())
+        //添加自定义检索器
+        .addCustomRetrieverFactory(new SVGMediaMetadataRetrieverFactory())
+        .addCustomRetrieverFactory(new CustomMediaMetadataRetrieverFactory())
+        .build()
+        //应用配置
+        .apply();
+```
+
+## 自定义检索器
+[custom](example/src/main/java/in/xiandan/mmrc/example/custom) 演示了以SVG文件为例如何**自定义检索器**
+
+```
+MediaMetadataConfig.newBuilder()
+        .addFileFormatChecker(new CustomFormatChecker())
+        .addCustomRetrieverFactory(new SVGMediaMetadataRetrieverFactory())
+        .build()
+        .apply();
+```
+
+## 相关项目
+[fresco](https://github.com/facebook/fresco)  
+[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)

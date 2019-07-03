@@ -12,6 +12,7 @@ import android.support.annotation.Nullable;
  */
 public class BitmapProcessor {
 
+
     @Nullable
     public static Bitmap rotate(@Nullable Bitmap bitmap, float rotate) {
         if (bitmap != null && rotate != 0f) {
@@ -34,9 +35,22 @@ public class BitmapProcessor {
         }
     }
 
+    /**
+     * 向下缩放
+     *
+     * @param bitmap
+     * @param scale
+     * @return
+     */
     @Nullable
-    public static Bitmap centerCrop(@Nullable Bitmap bitmap, Bitmap.Config config, int dstWidth, int dstHeight) {
-        return rotateCenterCrop(bitmap, config, 0, dstWidth, dstHeight);
+    public static Bitmap floorScale(@Nullable Bitmap bitmap, float scale) {
+        return scale < 1f ? scale(bitmap, scale) : bitmap;
+    }
+
+
+    @Nullable
+    public static Bitmap centerCrop(@Nullable Bitmap bitmap, int dstWidth, int dstHeight) {
+        return rotateCenterCrop(bitmap, 0, dstWidth, dstHeight);
     }
 
     /**
@@ -51,7 +65,7 @@ public class BitmapProcessor {
      * @see <a href="https://github.com/bumptech/glide/blob/master/library/src/main/java/com/bumptech/glide/load/resource/bitmap/TransformationUtils.java#L111">TransformationUtils</a>
      */
     @Nullable
-    public static Bitmap rotateCenterCrop(@Nullable Bitmap bitmap, Bitmap.Config config, int rotate, int dstWidth, int dstHeight) {
+    public static Bitmap rotateCenterCrop(@Nullable Bitmap bitmap, int rotate, int dstWidth, int dstHeight) {
         if (bitmap == null || (bitmap.getWidth() == dstWidth && bitmap.getHeight() == dstHeight)) {
             return bitmap;
         }
@@ -81,7 +95,7 @@ public class BitmapProcessor {
             matrix.postRotate(rotate, px, py);
         }
 
-        final Bitmap targetBitmap = Bitmap.createBitmap(dstWidth, dstHeight, config);
+        final Bitmap targetBitmap = Bitmap.createBitmap(dstWidth, dstHeight, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(targetBitmap);
         canvas.drawBitmap(bitmap, matrix, new Paint(Paint.ANTI_ALIAS_FLAG));
         return targetBitmap;

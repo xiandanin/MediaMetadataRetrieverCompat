@@ -2,19 +2,22 @@ package in.xiandan.mmrc.retriever.ffmpeg;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.TextUtils;
 
 import java.io.IOException;
 
 import in.xiandan.mmrc.IMediaMetadataRetriever;
-import in.xiandan.mmrc.MediaRetrieverResource;
+import in.xiandan.mmrc.MediaMetadataConfig;
+import in.xiandan.mmrc.MediaMetadataKey;
+import in.xiandan.mmrc.MediaMetadataResource;
 import in.xiandan.mmrc.datasource.DataSource;
 import in.xiandan.mmrc.datasource.FileDescriptorSource;
 import in.xiandan.mmrc.datasource.FileSource;
 import in.xiandan.mmrc.datasource.HTTPSource;
 import in.xiandan.mmrc.datasource.UriSource;
 import in.xiandan.mmrc.utils.BitmapProcessor;
-import in.xiandan.mmrc.utils.MetadataValueFormat;
+import in.xiandan.mmrc.utils.MetadataRetrieverUtils;
 import wseemann.media.FFmpegMediaMetadataRetriever;
 
 /**
@@ -54,22 +57,29 @@ public class FFmpegMediaMetadataRetrieverImpl implements IMediaMetadataRetriever
             final UriSource uriSource = ((UriSource) source);
             this.mRetriever.setDataSource(uriSource.getContext(), uriSource.source());
         } else {
-            MediaRetrieverResource.Config.get().setCustomDataSource(this);
+            final MediaMetadataConfig.CustomDataSourceCallback callback = MediaMetadataResource.globalConfig().getSourceCallback();
+            if (callback != null) {
+                callback.setCustomDataSource(this, source);
+            }
         }
     }
 
+    @Nullable
     @Override
     public Bitmap getFrameAtTime() {
-        return this.mRetriever.getFrameAtTime();
+        return BitmapProcessor.rotate(this.mRetriever.getFrameAtTime(), getRotationDegrees());
     }
 
+    @Nullable
     @Override
-    public Bitmap getFrameAtTime(long timeUs, int option) {
-        return BitmapProcessor.rotate(this.mRetriever.getFrameAtTime(timeUs, option), getRotationDegrees());
+    public Bitmap getFrameAtTime(long millis, int option) {
+        return BitmapProcessor.rotate(this.mRetriever.getFrameAtTime(millis * 1000, option), getRotationDegrees());
     }
 
+    @Nullable
     @Override
-    public Bitmap getScaledFrameAtTime(long timeUs, int option, int dstWidth, int dstHeight) {
+    public Bitmap getScaledFrameAtTime(long millis, int option, int dstWidth, int dstHeight) {
+        long timeUs = millis * 1000;
         final int srcWidth = getWidth();
         final int srcHeight = getHeight();
         if (srcWidth > 0 && srcHeight > 0) {
@@ -87,12 +97,12 @@ public class FFmpegMediaMetadataRetrieverImpl implements IMediaMetadataRetriever
 
     @Override
     public String extractMetadata(String keyCode) {
-        final MediaRetrieverResource.KeyCompat keyCompat = MediaRetrieverResource.getKey(keyCode);
-        String value = keyCompat == null || keyCompat.ffmpeg == null ? null : this.mRetriever.extractMetadata(keyCompat.ffmpeg);
+        final MediaMetadataResource.KeyCompat key = MediaMetadataResource.getKey(keyCode);
+        String value = key == null || key.ffmpeg == null ? null : this.mRetriever.extractMetadata(key.ffmpeg);
         //统一格式
         if (!TextUtils.isEmpty(value)) {
-            if (MediaRetrieverResource.Key.METADATA_KEY_DATE.equals(keyCode)) {
-                return MetadataValueFormat.parseTimeString("yyyy-MM-dd HH:mm:ss", value);
+            if (MediaMetadataKey.DATE.equals(keyCode)) {
+                return MetadataRetrieverUtils.parseTimeString("yyyy-MM-dd HH:mm:ss", value);
             }
         }
         return value;

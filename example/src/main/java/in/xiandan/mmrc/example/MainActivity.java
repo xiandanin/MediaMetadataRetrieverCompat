@@ -12,7 +12,6 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -28,10 +27,14 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
+import in.xiandan.mmrc.MediaMetadataConfig;
+import in.xiandan.mmrc.MediaMetadataKey;
+import in.xiandan.mmrc.MediaMetadataResource;
 import in.xiandan.mmrc.MediaMetadataRetrieverCompat;
 import in.xiandan.mmrc.MediaMetadataRetrieverFactory;
-import in.xiandan.mmrc.MediaRetrieverResource;
-import in.xiandan.mmrc.datasource.URLSource;
+import in.xiandan.mmrc.example.custom.CustomFormatChecker;
+import in.xiandan.mmrc.example.custom.CustomKey;
+import in.xiandan.mmrc.example.custom.SVGMediaMetadataRetrieverFactory;
 import in.xiandan.mmrc.fileformat.UnknownFileFormatException;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     RecyclerView rv;
     Spinner spinner;
     Spinner spinner_frame;
+    Spinner spinner_size;
 
     private ThumbnailAdapter mThumbnailAdapter;
 
@@ -57,8 +61,14 @@ public class MainActivity extends AppCompatActivity {
 
     private List<String> mKeys;
 
-    private int mFetchFrameOption = MediaRetrieverResource.Key.OPTION_CLOSEST_SYNC;
+    private int mSizeType = CENTER_CROP;
+    private int mFetchFrameOption = MediaMetadataKey.OPTION_CLOSEST_SYNC;
     private Class<MediaMetadataRetrieverFactory> mRetrieverFactoryCls;
+
+    private static final int CENTER_CROP = 0;
+    private static final int ORIGINAL_SIZE = 1;
+    private static final int FLOOR_SCALE = 2;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,17 +79,25 @@ public class MainActivity extends AppCompatActivity {
         rv = (RecyclerView) findViewById(R.id.rv);
         spinner = (Spinner) findViewById(R.id.spinner);
         spinner_frame = (Spinner) findViewById(R.id.spinner_frame);
+        spinner_size = (Spinner) findViewById(R.id.spinner_size);
 
         //ed.setText("http://p19.qhimg.com/bdr/__85/t01a05462d1b63252e4.jpg");
         //ed.setText("http://9890.vod.myqcloud.com/9890_4e292f9a3dd011e6b4078980237cc3d3.f20.mp4");
+
+        //应用全局配置
+        MediaMetadataConfig.newBuilder()
+                .addFileFormatChecker(new CustomFormatChecker())
+                .addCustomRetrieverFactory(new SVGMediaMetadataRetrieverFactory())
+                .build()
+                .apply();
 
         mKeys = getAllKeys();
 
         rv.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
 
 
-        final List<MediaMetadataRetrieverFactory> factories = MediaRetrieverResource.Config.get().getFactories();
-        spinner.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, new String[factories.size() + 1]) {
+        final List<MediaMetadataRetrieverFactory> factories = MediaMetadataResource.globalConfig().getFactories();
+        spinner.setAdapter(new ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, new String[factories.size() + 1]) {
             @Override
             public String getItem(int position) {
                 return position == 0 ? "自动" : factories.get(position - 1).getClass().getSimpleName().replace("Factory", "");
@@ -105,16 +123,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         final String[] fetchFrame = new String[]{"OPTION_CLOSEST_SYNC", "OPTION_CLOSEST", "OPTION_PREVIOUS_SYNC", "OPTION_NEXT_SYNC"};
-        spinner_frame.setAdapter(new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, fetchFrame));
+        spinner_frame.setAdapter(new ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, fetchFrame));
         spinner_frame.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 try {
-                    final Field field = MediaRetrieverResource.Key.class.getField(fetchFrame[position]);
+                    final Field field = MediaMetadataKey.class.getField(fetchFrame[position]);
                     mFetchFrameOption = field.getInt(null);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
+        final String[] sizes = new String[]{"CenterCrop", "原始尺寸", "向下缩放"};
+        spinner_size.setAdapter(new ArrayAdapter<String>(this, R.layout.simple_spinner_dropdown_item, sizes));
+        spinner_size.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSizeType = position;
             }
 
             @Override
@@ -128,14 +160,15 @@ public class MainActivity extends AppCompatActivity {
         bindExampleRecyclerView((RecyclerView) findViewById(R.id.rv_image), "sample-image", 5);
         bindExampleRecyclerView((RecyclerView) findViewById(R.id.rv_audio), "sample-audio", 5);
         bindExampleRecyclerView((RecyclerView) findViewById(R.id.rv_video), "sample-video", 4);
+        bindExampleRecyclerView((RecyclerView) findViewById(R.id.rv_custom), "sample-custom", 4);
 
     }
 
     private List<String> getAllKeys() {
         List<String> keys = new ArrayList<>();
-        final Field[] fields = MediaRetrieverResource.Key.class.getFields();
+        final Field[] fields = MediaMetadataKey.class.getFields();
         for (Field field : fields) {
-            if (field.getName().startsWith("METADATA_KEY")) {
+            if (!field.getName().startsWith("OPTION")) {
                 try {
                     keys.add((String) field.get(null));
                 } catch (IllegalAccessException e) {
@@ -146,6 +179,18 @@ public class MainActivity extends AppCompatActivity {
         final Field[] exifFields = ExifInterface.class.getFields();
         for (Field field : exifFields) {
             if (field.getName().startsWith("TAG")) {
+                try {
+                    keys.add((String) field.get(null));
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        //自定义
+        final Field[] customFields = CustomKey.class.getFields();
+        for (Field field : customFields) {
+            if (field.getName().startsWith("METADATA_KEY")) {
                 try {
                     keys.add((String) field.get(null));
                 } catch (IllegalAccessException e) {
@@ -187,22 +232,19 @@ public class MainActivity extends AppCompatActivity {
         Observable.just(input).flatMap((Function<String, ObservableSource<String>>) url -> {
             //设置数据源
             mmrc.setDataSourceOrThrow(URLSource.create(MainActivity.this, url), mRetrieverFactoryCls);
-            Log.d("------>", "初始化--->" + Thread.currentThread().getName());
             //异步获取所有能拿到的值
             return obtainMetadataInfo(mmrc);
         })
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .map(info -> {
-                    Log.d("------>", "数据完成--->" + Thread.currentThread().getName());
                     tv.setText(info);
                     return info;
                 })
                 .map(s -> {
-                    Log.d("------>", "计算--->" + Thread.currentThread().getName());
-                    final long duration = mmrc.extractMetadataLong(MediaRetrieverResource.Key.METADATA_KEY_DURATION, 0);
-                    //每500毫秒取一帧
-                    final long interval = 500;
+                    final long duration = mmrc.extractMetadataLong(MediaMetadataKey.DURATION, 0);
+                    //每1秒取一帧
+                    final long interval = 1000;
                     //最少取一帧 最多取10帧
                     final int itemCount = (int) Math.min(Math.max(1, duration / interval), 10);
                     mThumbnailAdapter = new ThumbnailAdapter(itemCount);
@@ -224,7 +266,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onNext(ThumbnailBitmap thumbnail) {
-                        Log.d("------>", "onNext--->" + Thread.currentThread().getName() + "-->" + thumbnail.getIndex());
                         //缩略图更新到RecyclerView
                         mThumbnailAdapter.setThumbnail(thumbnail);
                     }
@@ -245,7 +286,6 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onComplete() {
-                        Log.d("------>", "完成--->" + Thread.currentThread().getName());
                         mmrc.release();
                     }
                 });
@@ -259,13 +299,18 @@ public class MainActivity extends AppCompatActivity {
         return Observable.create(new ObservableOnSubscribe<ThumbnailBitmap>() {
             @Override
             public void subscribe(@NonNull ObservableEmitter<ThumbnailBitmap> s) throws Exception {
-                Log.d("------>", "缩略图---subscribe--->" + Thread.currentThread().getName());
                 //异步获取缩略图
                 for (int i = 0; i < itemCount; i++) {
                     long millis = i * interval;
-                    //Bitmap atTime = mMMRC.getFrameAtTime(millis * 1000, MediaRetrieverResource.Key.OPTION_CLOSEST);
-                    Bitmap atTime = mmrc.getCenterCropFrameAtTime(millis * 1000, mFetchFrameOption, size, size);
-                    s.onNext(new ThumbnailBitmap(i, millis, atTime));
+                    Bitmap atTime;
+                    if (ORIGINAL_SIZE == mSizeType) {
+                        atTime = mmrc.getFrameAtTime(millis, mFetchFrameOption);
+                    } else if (FLOOR_SCALE == mSizeType) {
+                        atTime = mmrc.getScaledFrameAtTime(millis, mFetchFrameOption, size, size);
+                    } else {
+                        atTime = mmrc.getCenterCropFrameAtTime(millis, mFetchFrameOption, size, size);
+                    }
+                    s.onNext(new ThumbnailBitmap(i, atTime));
                 }
                 s.onComplete();
             }
@@ -279,7 +324,6 @@ public class MainActivity extends AppCompatActivity {
         return Observable.just("").map(new Function<String, String>() {
             @Override
             public String apply(String empty) throws Exception {
-                Log.d("------>", "数据--->" + Thread.currentThread().getName());
                 StringBuilder sb = new StringBuilder();
                 sb.append("Retriever：");
                 sb.append(mmrc.getRetriever().getClass().getSimpleName());

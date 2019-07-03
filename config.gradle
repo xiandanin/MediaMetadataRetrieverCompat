@@ -9,9 +9,6 @@ ext {
                     minSdkVersion    : 19,
                     targetSdkVersion : 28,
                     supportVersion   : "28.0.0",
-
-                    fresco           : "2.0.0",
-                    glide            : "4.9.0",
             ]
 
     jcenter =
