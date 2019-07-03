@@ -1,7 +1,7 @@
 ## 效果
 　　　　　图片　　　　　　　　　音频　　　　　　　　　　视频　　　　　　　　　自定义
 
-<img src="screenshot/1.gif" width="160"/> <img src="screenshot/2.gif" width="160"/> <img src="screenshot/3.gif" width="160"/> <img src="screenshot/4.gif" width="160"/>
+<img src="screenshot/1.gif" width="180"/> <img src="screenshot/2.gif" width="180"/> <img src="screenshot/3.gif" width="180"/> <img src="screenshot/4.gif" width="180"/>
 
 示例APK：[example-debug.apk](https://github.com/dengyuhan/MediaMetadataRetrieverCompat/releases/download/1.2.0/example-debug.apk)
 
@@ -14,6 +14,7 @@ implementation 'in.xiandan.mmrc:media-metadata-retriever-compat:1.2.0'
 implementation 'com.android.support:exifinterface:28.0.0'
 //可选，需要FFmpeg支持时必选，全平台约24M
 implementation 'com.github.wseemann:FFmpegMediaMetadataRetriever:1.0.14'
+
 //只保留v7a，可降低至3M
 ndk {
     abiFilters 'armeabi-v7a'
@@ -69,10 +70,13 @@ final long width = mmrc.extractMetadataLong(MediaMetadataKey.WIDTH, 0L);
 ```
 //最接近timeUs的关键帧 - 仅视频
 MediaMetadataKey.OPTION_CLOSEST_SYNC
+
 //最接近timeUs的帧，不一定是关键帧(性能开销较大) - 仅视频
 MediaMetadataKey.OPTION_CLOSEST
+
 //早于timeUs的关键帧 - 仅视频
 MediaMetadataKey.OPTION_PREVIOUS_SYNC
+
 //晚于timeUs的关键帧 - 仅视频
 MediaMetadataKey.OPTION_NEXT_SYNC
 ```
