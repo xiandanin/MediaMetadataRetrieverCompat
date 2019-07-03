@@ -1,32 +1,30 @@
 ext {
-    android =
+    android = //项目本地信息
             [
-                    versionCode      : 11,
-                    versionName      : "1.2.0",
+                    applicationId    : "in.xiandan.mmrc.example",
 
+                    //sdk版本
                     compileSdkVersion: 28,
                     buildToolsVersion: "28.0.3",
                     minSdkVersion    : 19,
                     targetSdkVersion : 28,
                     supportVersion   : "28.0.0",
             ]
-
-    jcenter =
+    version = //版本信息
             [
-                    //项目名称
-                    name       : "MediaMetadataRetrieverCompat",
-                    groupId    : "in.xiandan.mmrc",
-                    //项目地址
-                    siteUrl    : "https://github.com/dengyuhan/MediaMetadataRetrieverCompat",
-                    //项目git地址
-                    gitUrl     : "https://github.com/dengyuhan/MediaMetadataRetrieverCompat.git",
-                    //项目描述
-                    description: "多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频缩略图",
-                    //开发者的一些基本信息
-                    authorId   : "dengyuhan",
-                    authorName : "dengyuhan",
-                    authorEmail: "22309946@qq.com",
+                    code: 11, //版本号
+                    name: "1.2.0", //版本名称
+                    desc: "1.调整了设置数据源的方式\n2.支持自定义检索器\n3.对图片有更好的支持", //版本描述
             ]
-
+    bintray = //项目上传信息
+            [
+                    name        : "MediaMetadataRetrieverCompat", //项目名称，在bintray网站中的名称
+                    desc        : "多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频缩略图", //项目描述 可选
+                    groupId     : "in.xiandan.mmrc",
+                    artifactId  : "media-metadata-retriever-compat",
+                    githubName  : "dengyuhan/MediaMetadataRetrieverCompat", //Github上的项目名称
+                    githubReadme: "README.md", //Github上的项目文档相对路径 可选
+                    licenses    : ["MIT"] //开源协议
+            ]
 
 }

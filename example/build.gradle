@@ -2,13 +2,12 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion rootProject.ext.android.compileSdkVersion
-    buildToolsVersion rootProject.ext.android.buildToolsVersion
     defaultConfig {
-        applicationId "in.xiandan.mmrc.example"
+        applicationId rootProject.ext.android.applicationId
         minSdkVersion rootProject.ext.android.minSdkVersion
         targetSdkVersion rootProject.ext.android.targetSdkVersion
-        versionCode rootProject.ext.android.targetSdkVersion
-        versionName rootProject.ext.android.versionName
+        versionCode rootProject.ext.version.code
+        versionName rootProject.ext.version.name
 
         ndk {
             abiFilters 'armeabi-v7a'

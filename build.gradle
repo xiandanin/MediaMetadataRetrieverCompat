@@ -1,29 +1,29 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
-apply from: "config.gradle"
-
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 buildscript {
+
     repositories {
-        jcenter()
         google()
+        jcenter()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.4.1'
-
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.4'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
     }
 }
+
+plugins {
+    id "com.jfrog.bintray" version "1.8.4"
+    id "com.github.dcendents.android-maven" version "2.1"
+}
+apply from: "config.gradle"
 
 allprojects {
     repositories {
-        jcenter()
         google()
-        maven{url 'https://dl.bintray.com/dengyuhan/maven'}
+        jcenter()
     }
 }
 
-task clean(type: Delete) {
+/*task clean(type: Delete) {
     delete rootProject.buildDir
-}
+}*/
