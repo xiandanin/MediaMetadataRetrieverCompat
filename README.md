@@ -1,13 +1,7 @@
-# MediaMetadataRetrieverCompat
-多媒体元数据兼容方案 - 支持获取图片、视频、音频文件的媒体信息、视频图片缩略图  
-
 ## 效果
 　　　　　图片　　　　　　　　　音频　　　　　　　　　　视频　　　　　　　　　自定义
 
-<img src="screenshot/1.gif" width="160"/>
-<img src="screenshot/2.gif" width="160"/>
-<img src="screenshot/3.gif" width="160"/>
-<img src="screenshot/4.gif" width="160"/>
+<img src="screenshot/1.gif" width="160"/> <img src="screenshot/2.gif" width="160"/> <img src="screenshot/3.gif" width="160"/> <img src="screenshot/4.gif" width="160"/>
 
 示例APK：[example-debug.apk](https://github.com/dengyuhan/MediaMetadataRetrieverCompat/releases/download/1.2.0/example-debug.apk)
 
