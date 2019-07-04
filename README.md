@@ -127,10 +127,10 @@ MediaMetadataConfig.newBuilder()
 ```
 
 ## 相关资料
-[fresco/imageformat](https://github.com/facebook/fresco/tree/master/imagepipeline-base/src/main/java/com/facebook/imageformat)  
-[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)
-[MediaMetadataRetriever](https://developer.android.google.cn/reference/kotlin/android/media/MediaMetadataRetriever)
-[ImageDecoder](https://developer.android.google.cn/reference/android/graphics/ImageDecoder)
-[ExifInterface](https://developer.android.google.cn/reference/android/media/ExifInterface)
+[fresco/imageformat](https://github.com/facebook/fresco/tree/master/imagepipeline-base/src/main/java/com/facebook/imageformat)   
+[FFmpegMediaMetadataRetriever](https://github.com/wseemann/FFmpegMediaMetadataRetriever)   
+[MediaMetadataRetriever](https://developer.android.google.cn/reference/kotlin/android/media/MediaMetadataRetriever)   
+[ImageDecoder](https://developer.android.google.cn/reference/android/graphics/ImageDecoder)   
+[ExifInterface](https://developer.android.google.cn/reference/android/media/ExifInterface)   
 
 
